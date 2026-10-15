@@ -539,6 +539,7 @@ export const IssuedCardsPage: React.FC<IssuedCardsPageProps> = ({ customers, cam
           customer={activeKioskData.customer}
           card={activeKioskData.card}
           template={activeKioskData.template}
+          slug={currentOwner?.slug}
           onClose={() => setActiveKioskData(null)}
           onAwardStamp={handleAwardStamp}
           onRemoveStamp={handleRemoveStamp}

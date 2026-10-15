@@ -11,11 +11,13 @@ import { formatDateTime } from '../lib/locale';
 import type { AwardStampResult, RedeemRewardResult } from '../lib/db/issuedCards';
 import { useLanguage } from '../lib/i18n/LanguageContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { buildStaffScanEntryUrl } from '../lib/links';
 
 interface KioskModeProps {
   customer: Customer;
   card: IssuedCard;
   template: Template;
+  slug?: string;
   onClose: () => void;
   onAwardStamp?: (bypassCooldown?: boolean, remarks?: string) => Promise<AwardStampResult>;
   onRemoveStamp?: (remarks?: string) => Promise<AwardStampResult>;
@@ -74,6 +76,7 @@ export const KioskMode: React.FC<KioskModeProps> = ({
   customer,
   card,
   template,
+  slug,
   onClose,
   onAwardStamp,
   onRemoveStamp,
@@ -288,6 +291,9 @@ export const KioskMode: React.FC<KioskModeProps> = ({
                     mode="active"
                     currentStamps={card.stamps}
                     readOnly={true} 
+                    customerName={customer.name}
+                    cardId={card.uniqueId}
+                    qrValue={buildStaffScanEntryUrl(slug || '', card.uniqueId)}
                     onStampAddTap={handlePreviewStampAddTap}
                     onStampRemoveTap={handlePreviewStampRemoveTap}
                     className={cn("w-full h-full transition-opacity", isLocked && "opacity-50 grayscale-[0.5]")}
