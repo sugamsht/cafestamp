@@ -46,6 +46,131 @@ export async function insertIssuedCard(
   return { ok: true };
 }
 
+export type AwardStampResult =
+  | {
+      ok: true;
+      stamps: number;
+      maxStamps: number;
+      lastVisit: string;
+      status: 'Active' | 'Redeemed';
+      transaction: Transaction;
+    }
+  | {
+      ok: false;
+      error: string;
+      code?: 'COOLDOWN_ACTIVE' | 'UNAUTHORIZED' | 'FORBIDDEN' | 'CARD_FULL' | 'CARD_REDEEMED' | 'NOT_FOUND';
+      remainingSeconds?: number;
+    };
+
+export type RedeemRewardResult =
+  | {
+      ok: true;
+      stamps: number;
+      status: 'Redeemed';
+      completedDate: string;
+      transaction: Transaction;
+    }
+  | {
+      ok: false;
+      error: string;
+      code?: 'UNAUTHORIZED' | 'FORBIDDEN' | 'ALREADY_REDEEMED' | 'NOT_ELIGIBLE' | 'NOT_FOUND';
+    };
+
+export async function awardCustomerStamp(
+  cardUniqueId: string,
+  options?: { remarks?: string; bypassCooldown?: boolean; cooldownSeconds?: number }
+): Promise<AwardStampResult> {
+  const { data, error } = await supabase.rpc('award_customer_stamp', {
+    p_card_unique_id: cardUniqueId,
+    p_remarks: options?.remarks ?? null,
+    p_bypass_cooldown: options?.bypassCooldown ?? false,
+    p_cooldown_seconds: options?.cooldownSeconds ?? 300,
+  });
+
+  if (error) {
+    return { ok: false, error: error.message || 'Unable to award stamp.' };
+  }
+
+  if (!data || !data.ok) {
+    return {
+      ok: false,
+      error: data?.message || 'Unable to award stamp.',
+      code: data?.error,
+      remainingSeconds: data?.remaining_seconds,
+    };
+  }
+
+  return {
+    ok: true,
+    stamps: data.stamps,
+    maxStamps: data.max_stamps,
+    lastVisit: data.last_visit,
+    status: data.status,
+    transaction: data.transaction,
+  };
+}
+
+export async function removeCustomerStamp(
+  cardUniqueId: string,
+  remarks?: string
+): Promise<AwardStampResult> {
+  const { data, error } = await supabase.rpc('remove_customer_stamp', {
+    p_card_unique_id: cardUniqueId,
+    p_remarks: remarks ?? null,
+  });
+
+  if (error) {
+    return { ok: false, error: error.message || 'Unable to remove stamp.' };
+  }
+
+  if (!data || !data.ok) {
+    return {
+      ok: false,
+      error: data?.message || 'Unable to remove stamp.',
+      code: data?.error,
+    };
+  }
+
+  return {
+    ok: true,
+    stamps: data.stamps,
+    maxStamps: data.max_stamps,
+    lastVisit: data.last_visit,
+    status: data.status,
+    transaction: data.transaction,
+  };
+}
+
+export async function redeemCustomerReward(
+  cardUniqueId: string,
+  remarks?: string
+): Promise<RedeemRewardResult> {
+  const { data, error } = await supabase.rpc('redeem_customer_reward', {
+    p_card_unique_id: cardUniqueId,
+    p_remarks: remarks ?? null,
+  });
+
+  if (error) {
+    return { ok: false, error: error.message || 'Unable to redeem reward.' };
+  }
+
+  if (!data || !data.ok) {
+    return {
+      ok: false,
+      error: data?.message || 'Unable to redeem reward.',
+      code: data?.error,
+    };
+  }
+
+  return {
+    ok: true,
+    stamps: data.stamps,
+    status: data.status,
+    completedDate: data.completed_date,
+    transaction: data.transaction,
+  };
+}
+
 export async function updateIssuedCard(
   cardId: string,
   updates: Partial<Pick<IssuedCard, 'stamps' | 'status' | 'completedDate' | 'lastVisit'>>

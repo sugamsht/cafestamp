@@ -20,7 +20,7 @@ import { resolveCardTemplate, toStoredTemplate } from '../lib/templateSerializat
 import { useAuth } from './AuthProvider';
 import { buildPublicCardUrl } from '../lib/links';
 import { ScanDetectionResult, ScanQrDialog } from './ScanQrDialog';
-import { insertIssuedCard, updateIssuedCard, deleteIssuedCard, insertTransaction, inspectScannedCard } from '../lib/db/issuedCards';
+import { insertIssuedCard, updateIssuedCard, deleteIssuedCard, insertTransaction, inspectScannedCard, awardCustomerStamp, removeCustomerStamp, redeemCustomerReward } from '../lib/db/issuedCards';
 import { upsertCustomer } from '../lib/db/customers';
 import { useSubscriptionContext } from './SubscriptionContext';
 
@@ -64,6 +64,151 @@ export const IssuedCardsPage: React.FC<IssuedCardsPageProps> = ({ customers, cam
     }
     return null;
   }, [campaigns, customers]);
+
+  const handleAwardStamp = async (bypassCooldown = false, remarks?: string) => {
+    if (!activeKioskData) {
+      return { ok: false, error: 'No active card selected.' } as const;
+    }
+    setMutationBusy(true);
+    setMutationError("");
+    const uniqueId = activeKioskData.card.uniqueId;
+    try {
+      const result = await awardCustomerStamp(uniqueId, { remarks, bypassCooldown });
+      if (!result.ok) {
+        return result;
+      }
+
+      setCustomers(prev => prev.map(c => ({
+        ...c,
+        cards: c.cards.map(card => {
+          if (card.uniqueId === uniqueId) {
+            return {
+              ...card,
+              stamps: result.stamps,
+              lastVisit: result.lastVisit,
+              status: result.status,
+              history: [result.transaction, ...card.history],
+            };
+          }
+          return card;
+        })
+      })));
+
+      setActiveKioskData(prev => {
+        if (!prev || prev.card.uniqueId !== uniqueId) return prev;
+        return {
+          ...prev,
+          card: {
+            ...prev.card,
+            stamps: result.stamps,
+            lastVisit: result.lastVisit,
+            status: result.status,
+            history: [result.transaction, ...prev.card.history],
+          }
+        };
+      });
+
+      return result;
+    } finally {
+      setMutationBusy(false);
+    }
+  };
+
+  const handleRemoveStamp = async (remarks?: string) => {
+    if (!activeKioskData) {
+      return { ok: false, error: 'No active card selected.' } as const;
+    }
+    setMutationBusy(true);
+    setMutationError("");
+    const uniqueId = activeKioskData.card.uniqueId;
+    try {
+      const result = await removeCustomerStamp(uniqueId, remarks);
+      if (!result.ok) {
+        return result;
+      }
+
+      setCustomers(prev => prev.map(c => ({
+        ...c,
+        cards: c.cards.map(card => {
+          if (card.uniqueId === uniqueId) {
+            return {
+              ...card,
+              stamps: result.stamps,
+              lastVisit: result.lastVisit,
+              status: result.status,
+              history: [result.transaction, ...card.history],
+            };
+          }
+          return card;
+        })
+      })));
+
+      setActiveKioskData(prev => {
+        if (!prev || prev.card.uniqueId !== uniqueId) return prev;
+        return {
+          ...prev,
+          card: {
+            ...prev.card,
+            stamps: result.stamps,
+            lastVisit: result.lastVisit,
+            status: result.status,
+            history: [result.transaction, ...prev.card.history],
+          }
+        };
+      });
+
+      return result;
+    } finally {
+      setMutationBusy(false);
+    }
+  };
+
+  const handleRedeemReward = async (remarks?: string) => {
+    if (!activeKioskData) {
+      return { ok: false, error: 'No active card selected.' } as const;
+    }
+    setMutationBusy(true);
+    setMutationError("");
+    const uniqueId = activeKioskData.card.uniqueId;
+    try {
+      const result = await redeemCustomerReward(uniqueId, remarks);
+      if (!result.ok) {
+        return result;
+      }
+
+      setCustomers(prev => prev.map(c => ({
+        ...c,
+        cards: c.cards.map(card => {
+          if (card.uniqueId === uniqueId) {
+            return {
+              ...card,
+              status: 'Redeemed',
+              completedDate: result.completedDate,
+              history: [result.transaction, ...card.history],
+            };
+          }
+          return card;
+        })
+      })));
+
+      setActiveKioskData(prev => {
+        if (!prev || prev.card.uniqueId !== uniqueId) return prev;
+        return {
+          ...prev,
+          card: {
+            ...prev.card,
+            status: 'Redeemed',
+            completedDate: result.completedDate,
+            history: [result.transaction, ...prev.card.history],
+          }
+        };
+      });
+
+      return result;
+    } finally {
+      setMutationBusy(false);
+    }
+  };
 
   const handleUpdateCard = async (customerId: string, cardId: string, updates: Partial<IssuedCard>) => {
     setMutationBusy(true);
@@ -391,6 +536,9 @@ export const IssuedCardsPage: React.FC<IssuedCardsPageProps> = ({ customers, cam
           card={activeKioskData.card}
           template={activeKioskData.template}
           onClose={() => setActiveKioskData(null)}
+          onAwardStamp={handleAwardStamp}
+          onRemoveStamp={handleRemoveStamp}
+          onRedeemReward={handleRedeemReward}
           onUpdateCard={handleUpdateCard}
           onIssueNew={handleKioskIssueNew}
           canIssue={canIssue}

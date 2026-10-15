@@ -5,15 +5,19 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
-import { Plus, Gift, History, User, ChevronLeft, Minus, Lock, CheckCircle, RefreshCcw, ShieldCheck, Clock3 } from 'lucide-react';
+import { Plus, Gift, History, User, ChevronLeft, Minus, Lock, CheckCircle, RefreshCcw, ShieldCheck, Clock3, AlertCircle } from 'lucide-react';
 import { cn } from '../lib/utils';
+import type { AwardStampResult, RedeemRewardResult } from '../lib/db/issuedCards';
 
 interface KioskModeProps {
   customer: Customer;
   card: IssuedCard;
   template: Template;
   onClose: () => void;
-  onUpdateCard: (customerId: string, cardId: string, updates: Partial<IssuedCard>) => Promise<void>;
+  onAwardStamp?: (bypassCooldown?: boolean, remarks?: string) => Promise<AwardStampResult>;
+  onRemoveStamp?: (remarks?: string) => Promise<AwardStampResult>;
+  onRedeemReward?: (remarks?: string) => Promise<RedeemRewardResult>;
+  onUpdateCard?: (customerId: string, cardId: string, updates: Partial<IssuedCard>) => Promise<void>;
   onIssueNew: (customer: Customer, template: Template) => void;
   canIssue: boolean;
   allowRedeem: boolean;
@@ -80,6 +84,9 @@ export const KioskMode: React.FC<KioskModeProps> = ({
   card,
   template,
   onClose,
+  onAwardStamp,
+  onRemoveStamp,
+  onRedeemReward,
   onUpdateCard,
   onIssueNew,
   canIssue,
@@ -91,6 +98,7 @@ export const KioskMode: React.FC<KioskModeProps> = ({
 }) => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [actionError, setActionError] = useState("");
+  const [cooldownRemaining, setCooldownRemaining] = useState<number | null>(null);
   
   // Confirmation States
   const [confirmAction, setConfirmAction] = useState<'stamp' | 'remove' | 'redeem' | null>(null);
@@ -141,56 +149,101 @@ export const KioskMode: React.FC<KioskModeProps> = ({
 
   // --- Handlers ---
 
-  const handleConfirmAction = async () => {
+  const handleConfirmAction = async (bypassCooldown = false) => {
       setActionError("");
       try {
           if (confirmAction === 'stamp') {
-              await performAddStamp();
+              await performAddStamp(bypassCooldown);
           } else if (confirmAction === 'remove') {
               await performRemoveStamp();
           } else if (confirmAction === 'redeem') {
               await performRedeem();
           }
-          setConfirmAction(null);
-          setRedemptionRemarks("");
       } catch {
           setActionError("Unable to update this card right now. Please try again.");
       }
   };
 
-  const performAddStamp = async () => {
+  const performAddStamp = async (bypassCooldown = false) => {
       setIsAnimating(true);
-      const tx = createTransaction('stamp_add', 1, 'Stamp Collected', undefined, { id: actorId, name: actorName, role: actorRole });
+      setActionError("");
+      setCooldownRemaining(null);
 
       try {
-          await onUpdateCard(customer.id, card.id, {
-              stamps: card.stamps + 1,
-              lastVisit: new Date().toISOString().split('T')[0],
-              history: [tx, ...card.history]
-          });
+          if (onAwardStamp) {
+              const result = await onAwardStamp(bypassCooldown);
+              if (!result.ok) {
+                  if (result.code === 'COOLDOWN_ACTIVE' && result.remainingSeconds) {
+                      setCooldownRemaining(result.remainingSeconds);
+                      setActionError(result.error);
+                      return;
+                  }
+                  setActionError(result.error);
+                  return;
+              }
+              setConfirmAction(null);
+              return;
+          }
+
+          if (onUpdateCard) {
+              const tx = createTransaction('stamp_add', 1, 'Stamp Collected', undefined, { id: actorId, name: actorName, role: actorRole });
+              await onUpdateCard(customer.id, card.id, {
+                  stamps: card.stamps + 1,
+                  lastVisit: new Date().toISOString().split('T')[0],
+                  history: [tx, ...card.history]
+              });
+              setConfirmAction(null);
+          }
       } finally {
           setTimeout(() => setIsAnimating(false), 300);
       }
   };
 
   const performRemoveStamp = async () => {
-      const tx = createTransaction('stamp_remove', -1, 'Stamp Removed', 'Manual Correction', { id: actorId, name: actorName, role: actorRole });
+      setActionError("");
+      if (onRemoveStamp) {
+          const result = await onRemoveStamp('Manual Correction');
+          if (!result.ok) {
+              setActionError(result.error);
+              return;
+          }
+          setConfirmAction(null);
+          return;
+      }
 
-      await onUpdateCard(customer.id, card.id, {
-          stamps: Math.max(0, card.stamps - 1),
-          history: [tx, ...card.history]
-      });
+      if (onUpdateCard) {
+          const tx = createTransaction('stamp_remove', -1, 'Stamp Removed', 'Manual Correction', { id: actorId, name: actorName, role: actorRole });
+          await onUpdateCard(customer.id, card.id, {
+              stamps: Math.max(0, card.stamps - 1),
+              history: [tx, ...card.history]
+          });
+          setConfirmAction(null);
+      }
   };
 
   const performRedeem = async () => {
-      const tx = createTransaction('redeem', 0, 'Reward Redeemed', redemptionRemarks, { id: actorId, name: actorName, role: actorRole });
+      setActionError("");
+      if (onRedeemReward) {
+          const result = await onRedeemReward(redemptionRemarks || undefined);
+          if (!result.ok) {
+              setActionError(result.error);
+              return;
+          }
+          setConfirmAction(null);
+          setRedemptionRemarks("");
+          return;
+      }
 
-      // Lock the card by setting status to Redeemed
-      await onUpdateCard(customer.id, card.id, {
-          status: 'Redeemed',
-          completedDate: new Date().toISOString().split('T')[0],
-          history: [tx, ...card.history]
-      });
+      if (onUpdateCard) {
+          const tx = createTransaction('redeem', 0, 'Reward Redeemed', redemptionRemarks, { id: actorId, name: actorName, role: actorRole });
+          await onUpdateCard(customer.id, card.id, {
+              status: 'Redeemed',
+              completedDate: new Date().toISOString().split('T')[0],
+              history: [tx, ...card.history]
+          });
+          setConfirmAction(null);
+          setRedemptionRemarks("");
+      }
   };
 
   const handleIssueNext = () => {
@@ -599,6 +652,27 @@ export const KioskMode: React.FC<KioskModeProps> = ({
                             Reward: <span className="font-medium text-[#1d1d1f]">{template.rewardName}</span>
                         </p>
                     </div>
+
+                    {actionError && (
+                        <div className="rounded-[20px] border border-rose-200 bg-rose-50 p-3.5 text-xs text-rose-700 flex items-start gap-2">
+                            <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                            <div className="flex-1">
+                                <p>{actionError}</p>
+                                {cooldownRemaining !== null && confirmAction === 'stamp' && (
+                                    <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="outline"
+                                        className="mt-2.5 h-8 rounded-full border-rose-300 bg-white text-xs font-semibold text-rose-800 hover:bg-rose-50"
+                                        onClick={() => handleConfirmAction(true)}
+                                        disabled={mutationBusy}
+                                    >
+                                        Bypass cooldown & award anyway
+                                    </Button>
+                                )}
+                            </div>
+                        </div>
+                    )}
 
                     {confirmAction === 'redeem' && (
                         <div className="space-y-3">
