@@ -5,6 +5,9 @@ import { Button } from './ui/button';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthProvider';
 import { useSubscriptionContext } from './SubscriptionContext';
+import { useLanguage } from '../lib/i18n/LanguageContext';
+import { LanguageSwitcher } from './LanguageSwitcher';
+import type { TranslationKey } from '../lib/i18n/translations';
 
 interface SidebarProps {
   className?: string;
@@ -17,13 +20,13 @@ interface SidebarContentProps {
 }
 
 export const NAV_ITEMS = [
-  { path: '/dashboard', label: 'Panel', icon: LayoutDashboard, roles: ['owner'] },
-  { path: '/campaigns', label: 'Campañas', icon: CreditCard, roles: ['owner'] },
-  { path: '/issued-cards', label: 'Tarjetas Emitidas', icon: Wallet, roles: ['owner', 'staff'] },
-  { path: '/transactions', label: 'Transacciones', icon: History, roles: ['owner'] },
-  { path: '/customers', label: 'Clientes', icon: Users, roles: ['owner', 'staff'] },
-  { path: '/analytics', label: 'Estadísticas', icon: Sparkles, roles: ['owner'] },
-  { path: '/settings', label: 'Ajustes', icon: Settings, roles: ['owner'] },
+  { path: '/dashboard', labelKey: 'nav_dashboard' as TranslationKey, icon: LayoutDashboard, roles: ['owner'] },
+  { path: '/campaigns', labelKey: 'nav_campaigns' as TranslationKey, icon: CreditCard, roles: ['owner'] },
+  { path: '/issued-cards', labelKey: 'nav_issued_cards' as TranslationKey, icon: Wallet, roles: ['owner', 'staff'] },
+  { path: '/transactions', labelKey: 'nav_transactions' as TranslationKey, icon: History, roles: ['owner'] },
+  { path: '/customers', labelKey: 'nav_customers' as TranslationKey, icon: Users, roles: ['owner', 'staff'] },
+  { path: '/analytics', labelKey: 'nav_analytics' as TranslationKey, icon: Sparkles, roles: ['owner'] },
+  { path: '/settings', labelKey: 'nav_settings' as TranslationKey, icon: Settings, roles: ['owner'] },
 ];
 
 const PlanBadge: React.FC = () => {
@@ -64,6 +67,7 @@ const PlanBadge: React.FC = () => {
 export const SidebarContent: React.FC<SidebarContentProps> = ({ onNavigate, onScanQr }) => {
   const navigate = useNavigate();
   const { currentUser, currentOwner, isStaff, logout } = useAuth();
+  const { t } = useLanguage();
 
   return (
     <div className="flex h-full flex-col py-8">
@@ -86,7 +90,7 @@ export const SidebarContent: React.FC<SidebarContentProps> = ({ onNavigate, onSc
                   className="w-full justify-start gap-2"
                 >
                   <item.icon size={20} />
-                  {item.label}
+                  {t(item.labelKey)}
                 </Button>
               )}
             </NavLink>
@@ -101,18 +105,21 @@ export const SidebarContent: React.FC<SidebarContentProps> = ({ onNavigate, onSc
               }}
             >
               <QrCode size={20} />
-              Escanear Código QR
+              {t('nav_scan_qr')}
             </Button>
           )}
         </div>
       </div>
       <div className="mt-auto px-4 pt-6 space-y-3">
+         <div className="pb-1">
+           <LanguageSwitcher variant="pill" />
+         </div>
          <PlanBadge />
          {currentUser && (
           <div className="rounded-lg border border-border/80 bg-card px-3 py-3 text-xs text-muted-foreground shadow-subtle">
               <div className="font-semibold text-foreground">{currentUser.businessName}</div>
               <div className="font-mono">@{currentOwner?.slug ?? "staff"}</div>
-              {isStaff && <div className="text-[10px] uppercase tracking-widest mt-1">Acceso de Personal</div>}
+              {isStaff && <div className="text-[10px] uppercase tracking-widest mt-1">{t('nav_staff_access')}</div>}
           </div>
          )}
          <Button
@@ -124,7 +131,7 @@ export const SidebarContent: React.FC<SidebarContentProps> = ({ onNavigate, onSc
             }}
          >
             <LogOut size={20} />
-            Cerrar Sesión
+            {t('nav_logout')}
          </Button>
          <div className="px-1 text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
             v0.5

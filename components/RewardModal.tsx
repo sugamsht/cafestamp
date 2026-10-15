@@ -2,17 +2,10 @@ import React, { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import { Loader2, PartyPopper, X } from 'lucide-react';
 import { ThemeColors } from '../types';
 import { resolveHexAndOpacity, hexToRgba } from '../lib/utils';
+import { useLanguage } from '../lib/i18n/LanguageContext';
+import { translations } from '../lib/i18n/translations';
 
 const LottiePlayer = lazy(() => import('lottie-react'));
-
-const COMPLETION_MESSAGES = [
-  "¡Felicidades! Has completado tu tarjeta de sellos. ¡Disfruta de tu consumición bien merecida!",
-  "¡Eres un cliente estrella! Gracias por acompañarnos cada día. Tu premio te espera.",
-  "¡Meta conseguida! Canjea tu invitación la próxima vez que pidas en barra.",
-  "La fidelidad tiene premio. Ya tienes disponible tu consumición de la casa.",
-  "¡Tarjeta llena! Disfruta de tu recompensa cortesía de la cafetería.",
-  "Gracias por tu visita constante. ¡Tu premio está listo para saborear!",
-];
 
 interface RewardModalProps {
   isOpen: boolean;
@@ -27,8 +20,9 @@ interface RewardModalProps {
 }
 
 export const RewardModal: React.FC<RewardModalProps> = ({ isOpen, onClose, loading, reward, rewardName, businessName, showCloseButton = true, scope = 'fullscreen', colors }) => {
+  const { t, language } = useLanguage();
   const [giftAnimation, setGiftAnimation] = useState<object | null>(null);
-  const [selectedMessage, setSelectedMessage] = useState<string>(COMPLETION_MESSAGES[0]);
+  const [selectedMessage, setSelectedMessage] = useState<string>('');
   const [isMobileViewport, setIsMobileViewport] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
     return window.innerWidth < 640;
@@ -64,8 +58,9 @@ export const RewardModal: React.FC<RewardModalProps> = ({ isOpen, onClose, loadi
   useEffect(() => {
     if (!isOpen || loading) return;
 
-    const nextIndex = Math.floor(Math.random() * COMPLETION_MESSAGES.length);
-    setSelectedMessage(COMPLETION_MESSAGES[nextIndex]);
+    const messages = translations[language].reward_messages;
+    const nextIndex = Math.floor(Math.random() * messages.length);
+    setSelectedMessage(messages[nextIndex] || messages[0]);
 
     let cancelled = false;
     void import('../Gift Box Orange.json')
@@ -83,7 +78,7 @@ export const RewardModal: React.FC<RewardModalProps> = ({ isOpen, onClose, loadi
     return () => {
       cancelled = true;
     };
-  }, [isOpen, loading]);
+  }, [isOpen, loading, language]);
 
   useEffect(() => {
     const onResize = () => setIsMobileViewport(window.innerWidth < 640);
@@ -153,12 +148,12 @@ export const RewardModal: React.FC<RewardModalProps> = ({ isOpen, onClose, loadi
           </div>
           
           <h2 className="text-2xl font-bold">
-            {loading ? "Preparando recompensa..." : "¡Tarjeta Completada!"}
+            {loading ? t('reward_preparing') : t('reward_completed_title')}
           </h2>
 
           {loading ? (
              <p className="opacity-70" style={{ color: hexToRgba(mutedColor.hex, mutedColor.opacity) }}>
-               Preparando tu recompensa...
+               {t('reward_preparing')}
              </p>
           ) : (
             <>
@@ -169,7 +164,7 @@ export const RewardModal: React.FC<RewardModalProps> = ({ isOpen, onClose, loadi
                 style={{ backgroundColor: panelBg.hex, borderColor: borderColor.hex }}
               >
                 <p className="text-xs uppercase tracking-wider mb-1 opacity-70" style={{ color: hexToRgba(mutedColor.hex, mutedColor.opacity) }}>
-                  Tu Recompensa
+                  {t('reward_claim_box')}
                 </p>
                 <p className="text-2xl font-mono font-bold tracking-widest">
                   {rewardName}
@@ -177,7 +172,7 @@ export const RewardModal: React.FC<RewardModalProps> = ({ isOpen, onClose, loadi
               </div>
 
               <p className="text-xs mt-1 opacity-50" style={{ color: hexToRgba(mutedColor.hex, mutedColor.opacity) }}>
-                Muestra esta pantalla al personal de "{businessName}".
+                {t('reward_show_staff', { business: businessName })}
               </p>
             </>
           )}

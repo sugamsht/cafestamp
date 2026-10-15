@@ -8,12 +8,14 @@ import { useAuth } from "./AuthProvider";
 import type { AuthResult } from "./AuthProvider";
 import { trackEvent } from "../lib/analytics";
 import { DEMO_WORKSPACE_ENABLED } from "../lib/siteConfig";
+import { useLanguage } from "../lib/i18n/LanguageContext";
 
 const inputCls =
   "h-14 rounded-[1.2rem] border border-black/[0.08] bg-[#f4f1ea] px-4 text-[15px] text-[#171512] shadow-none placeholder:text-[#8a8276] focus-visible:border-black/25 focus-visible:bg-white focus-visible:ring-0";
 const labelCls = "block text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[#777062]";
 
 export const LoginPage: React.FC = () => {
+  const { t } = useLanguage();
   const { currentUser, loading, login, loginDemo } = useAuth();
   const location = useLocation();
   const fromPath = (location.state as { from?: { pathname?: string } })?.from?.pathname;
@@ -81,22 +83,22 @@ export const LoginPage: React.FC = () => {
 
   return (
     <AuthSplitLayout
-      title="Welcome back"
-      subtitle="Log in to run campaigns, issue digital cards, and track loyalty activity from one place."
-      badge="Sign in"
+      title={t('login_welcome_back')}
+      subtitle={t('login_subtitle')}
+      badge={t('login_badge')}
       mode="login"
     >
       <form className="space-y-5" onSubmit={handleSubmit}>
         <p className="text-sm leading-6 text-[#6d6658]">
-          Owner access only. Staff members should continue using their dedicated portal link and PIN.
+          {t('login_owner_notice')}
         </p>
 
         <div className="space-y-1.5">
-          <label className={labelCls}>Email</label>
+          <label className={labelCls}>{t('login_email_label')}</label>
           <Input
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@brand.com"
+            placeholder={t('login_email_placeholder')}
             className={inputCls}
             type="email"
             autoComplete="email"
@@ -106,18 +108,18 @@ export const LoginPage: React.FC = () => {
 
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <label className={labelCls}>Password</label>
+            <label className={labelCls}>{t('login_password_label')}</label>
             <Link
               to="/forgot-password"
               className="text-[11px] text-[#6e6e73] underline-offset-2 hover:underline hover:text-[#1d1d1f]"
             >
-              Forgot password?
+              {t('login_forgot_password')}
             </Link>
           </div>
           <Input
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Your password"
+            placeholder={t('login_password_placeholder')}
             className={inputCls}
             type="password"
             autoComplete="current-password"
@@ -136,10 +138,10 @@ export const LoginPage: React.FC = () => {
           disabled={isDisabled}
           className="h-14 w-full rounded-[1.2rem] bg-[#1b1813] text-base font-semibold text-white shadow-none hover:bg-[#11100d] disabled:opacity-60"
         >
-          {isSubmitting ? "Signing in..." : <>Continue <ArrowRight className="ml-2 h-4 w-4" /></>}
+          {isSubmitting ? t('login_signing_in') : <>{t('login_continue')} <ArrowRight className="ml-2 h-4 w-4" /></>}
         </Button>
         {loading && !busy && (
-          <p className="text-center text-xs text-[#777062]">Checking existing session...</p>
+          <p className="text-center text-xs text-[#777062]">{t('login_checking_session')}</p>
         )}
 
         {showDemoWorkspace && (
@@ -147,7 +149,7 @@ export const LoginPage: React.FC = () => {
             <div className="relative py-1">
               <div className="border-t border-black/[0.08]" />
               <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#777062]">
-                or
+                {t('login_or')}
               </span>
             </div>
 
@@ -158,7 +160,7 @@ export const LoginPage: React.FC = () => {
               className="h-14 w-full rounded-[1.2rem] border-black/[0.08] bg-white text-base font-semibold text-[#171512] shadow-none hover:bg-[#f8f5ef]"
               onClick={handleDemo}
             >
-              Try Demo Workspace
+              {t('login_try_demo')}
             </Button>
           </>
         )}

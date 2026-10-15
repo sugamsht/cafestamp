@@ -12,6 +12,7 @@ import {
   WalletCards,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 type AuthMode = "login" | "signup" | "staff";
 
@@ -361,14 +362,17 @@ export const AuthSplitLayout: React.FC<AuthSplitLayoutProps> = ({
               <img src="/stampee.svg" alt="Stampee" className="h-10 w-auto sm:h-11" />
             </Link>
 
-            {theme.navLinkLabel && (
-              <Link
-                to={theme.navLinkTo}
-                className="inline-flex items-center rounded-full border border-black/10 bg-white/75 px-4 py-2.5 text-sm font-semibold text-[#1d1d1f] transition-colors hover:bg-white"
-              >
-                {theme.navLinkLabel}
-              </Link>
-            )}
+            <div className="flex items-center gap-3">
+              <LanguageSwitcher variant="toggle" />
+              {theme.navLinkLabel && (
+                <Link
+                  to={theme.navLinkTo}
+                  className="inline-flex items-center rounded-full border border-black/10 bg-white/75 px-4 py-2.5 text-sm font-semibold text-[#1d1d1f] transition-colors hover:bg-white"
+                >
+                  {theme.navLinkLabel}
+                </Link>
+              )}
+            </div>
           </header>
 
           <div className="mx-auto flex w-full max-w-[37rem] flex-1 flex-col justify-center py-6 sm:py-8 lg:py-10">

@@ -7,6 +7,8 @@ import { generateReward } from '../services/rewardService';
 import { Template, Transaction } from '../types';
 import { cn, resolveHexAndOpacity, hexToRgba } from '../lib/utils';
 import { translateTransactionTitle, translateTransactionRemarks } from '../lib/locale';
+import { useLanguage } from '../lib/i18n/LanguageContext';
+import { LanguageSwitcher } from './LanguageSwitcher';
 import { QrCode, History, Gift, Plus, X, Minus, CreditCard, Globe } from 'lucide-react';
 import { siFacebook, siInstagram, siTiktok, siX, siYoutube } from 'simple-icons/icons';
 
@@ -47,6 +49,7 @@ export const LoyaltyCard: React.FC<LoyaltyCardProps> = ({
     onStampAddTap,
     onStampRemoveTap
 }) => {
+  const { t, language } = useLanguage();
   const [stamps, setStamps] = useState<number>(0);
   const [showReward, setShowReward] = useState<boolean>(false);
   const [loadingReward, setLoadingReward] = useState<boolean>(false);
@@ -354,11 +357,14 @@ export const LoyaltyCard: React.FC<LoyaltyCardProps> = ({
           {/* --- SLIDE 1: FRONT (Stamps) --- */}
           <div className="w-full h-[50%] relative flex flex-col items-center justify-center p-6">
             
-            {/* NEW: Top Header (QR Button Only) */}
+            {/* Top Header (Language Switcher & QR Button) */}
             <div className={cn(
-                "absolute top-6 left-6 right-6 flex justify-end items-center z-30 transition-all duration-500",
+                "absolute top-6 left-6 right-6 flex justify-between items-center z-30 transition-all duration-500",
                 currentSlide === 0 ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"
             )}>
+                 {/* Left: Language Switcher */}
+                 <LanguageSwitcher variant="toggle" />
+
                  {/* Right: QR Trigger */}
                  <button 
                     onClick={() => {
@@ -445,7 +451,7 @@ export const LoyaltyCard: React.FC<LoyaltyCardProps> = ({
                       )}
                       style={{ color: hexToRgba(mutedColor.hex, mutedColor.opacity) }}
                     >
-                    {template.tagline ? template.tagline : `Consigue ${totalStamps} sellos para: ${rewardName}`}
+                    {template.tagline ? template.tagline : t('card_collect_stamps', { total: totalStamps, reward: rewardName })}
                     </p>
                 )}
               </div>
@@ -493,10 +499,10 @@ export const LoyaltyCard: React.FC<LoyaltyCardProps> = ({
               {isCompleted && !isRedeemed && shouldShowRewardModal ? (
                  <div className="mt-3 flex flex-col items-center text-center">
                    <h3 className={cn("text-lg md:text-2xl font-bold text-gray-900 mt-1", isMobileCompleted && "text-base")}>
-                     🎉 ¡Enhorabuena! 🎉
+                     {t('card_congratulations')}
                    </h3>
                    <p className={cn("text-base md:text-lg text-gray-600 leading-snug", isMobileCompleted && "text-sm")}>
-                      ¡Tu próximo <strong>{rewardName}</strong> es gratis! Muestra esta tarjeta al personal de la cafetería.
+                      {t('card_free_reward', { reward: rewardName })}
                    </p>
                  </div>
               ) : (
@@ -507,7 +513,7 @@ export const LoyaltyCard: React.FC<LoyaltyCardProps> = ({
                     )}
                     style={{ color: textColor.hex }}
                   >
-                    <p>Recompensa: {rewardName}</p>
+                    <p>{t('card_reward')}: {rewardName}</p>
                   </div>
               )}
 
@@ -550,14 +556,17 @@ export const LoyaltyCard: React.FC<LoyaltyCardProps> = ({
                        <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
                            <Icon size={16} className="text-gray-900"/>
                        </div>
-                       <span className="font-bold text-sm tracking-wide uppercase text-gray-500">Historial y QR</span>
+                       <span className="font-bold text-sm tracking-wide uppercase text-gray-500">{t('card_history_qr')}</span>
                    </div>
-                   <button 
-                     onClick={() => setCurrentSlide(0)} 
-                     className="p-2 -mr-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-900"
-                   >
-                       <X size={24} />
-                   </button>
+                   <div className="flex items-center gap-3">
+                     <LanguageSwitcher variant="toggle" />
+                     <button 
+                       onClick={() => setCurrentSlide(0)} 
+                       className="p-2 -mr-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-900"
+                     >
+                         <X size={24} />
+                     </button>
+                   </div>
               </div>
 
               {/* Inner Wrapper */}
@@ -573,7 +582,7 @@ export const LoyaltyCard: React.FC<LoyaltyCardProps> = ({
                 )}>
                     <div className="relative p-2 rounded-xl border-2 border-gray-100">
                         {qrValue ? (
-                          <QrCodeDisplay value={qrValue} label="Código QR de la tarjeta" className="h-[220px] w-[220px] rounded-lg" />
+                          <QrCodeDisplay value={qrValue} label={t('card_qr_code')} className="h-[220px] w-[220px] rounded-lg" />
                         ) : (
                           <>
                             <QrCode size={220} className="text-gray-900" />
@@ -589,12 +598,12 @@ export const LoyaltyCard: React.FC<LoyaltyCardProps> = ({
                       <div className="text-center space-y-1">
                         {customerName && (
                           <div className="text-sm text-gray-700">
-                            Emitida a favor de <span className="font-semibold">{customerName}</span>
+                            {t('card_issued_to')} <span className="font-semibold">{customerName}</span>
                           </div>
                         )}
                         {cardId && (
                           <div className="text-xs text-gray-400 font-mono">
-                            ID de Tarjeta: {cardId}
+                            {t('card_id')}: {cardId}
                           </div>
                         )}
                       </div>
@@ -608,13 +617,13 @@ export const LoyaltyCard: React.FC<LoyaltyCardProps> = ({
                 )}>
                     <div className="flex items-center gap-2 mb-4">
                         <History size={16} className="text-gray-400" />
-                        <span className="text-xs font-bold uppercase tracking-wider text-gray-400">Registro de Actividad</span>
+                        <span className="text-xs font-bold uppercase tracking-wider text-gray-400">{t('card_activity_log')}</span>
                     </div>
                     
                     <div className="w-full">
                          <div className="w-full p-0 space-y-4">
                             {history.length === 0 ? (
-                                <p className="text-center text-gray-400 text-sm py-4 italic">Aún no hay actividad registrada.</p>
+                                <p className="text-center text-gray-400 text-sm py-4 italic">{t('card_no_activity')}</p>
                             ) : (
                                 history.map((tx) => {
                                     const TxIcon = getTransactionIcon(tx.type);
@@ -633,10 +642,10 @@ export const LoyaltyCard: React.FC<LoyaltyCardProps> = ({
                                                     <TxIcon size={16} />
                                                 </div>
                                                 <div className="flex flex-col">
-                                                    <span className="text-sm font-semibold text-gray-900">{translateTransactionTitle(tx.title)}</span>
+                                                    <span className="text-sm font-semibold text-gray-900">{translateTransactionTitle(tx.title, language)}</span>
                                                     <span className="text-xs text-gray-400">{tx.date}</span>
                                                     {tx.remarks && (
-                                                        <span className="text-xs text-gray-500 mt-1 italic">"{translateTransactionRemarks(tx.remarks)}"</span>
+                                                        <span className="text-xs text-gray-500 mt-1 italic">"{translateTransactionRemarks(tx.remarks, language)}"</span>
                                                     )}
                                                 </div>
                                             </div>

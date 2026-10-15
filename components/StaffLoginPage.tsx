@@ -6,12 +6,14 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { useAuth } from "./AuthProvider";
 import { buildIssuedCardsKioskUrl } from "../lib/links";
+import { useLanguage } from "../lib/i18n/LanguageContext";
 
 const inputCls =
   "h-14 rounded-[1.2rem] border border-black/[0.08] bg-[#f4f1ea] px-4 text-[15px] text-[#171512] shadow-none placeholder:text-[#8a8276] focus-visible:border-black/25 focus-visible:bg-white focus-visible:ring-0";
 const labelCls = "block text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[#777062]";
 
 export const StaffLoginPage: React.FC = () => {
+  const { t } = useLanguage();
   const { currentUser, loginStaff } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -61,7 +63,7 @@ export const StaffLoginPage: React.FC = () => {
       }
       navigate(kioskId ? buildIssuedCardsKioskUrl(kioskId) : "/issued-cards");
     } catch {
-      setError("No se pudo iniciar sesión en este momento. Inténtalo de nuevo.");
+      setError(t('signup_service_unavailable'));
     } finally {
       setBusy(false);
     }
@@ -71,28 +73,28 @@ export const StaffLoginPage: React.FC = () => {
 
   return (
     <AuthSplitLayout
-      title="Portal de Personal"
-      subtitle="Accede con tu correo, PIN y el ID de cafetería para sellar consumiciones y agilizar la atención en barra."
-      badge="Acceso equipo"
+      title={t('staff_portal_title')}
+      subtitle={t('staff_portal_subtitle')}
+      badge={t('staff_team_access')}
       mode="staff"
     >
       <form className="space-y-5" onSubmit={handleSubmit}>
         <p className="text-sm leading-6 text-[#6d6658]">
-          Las credenciales de personal son independientes del acceso del propietario y quedan vinculadas al negocio.
+          {t('staff_credentials_notice')}
         </p>
 
         {kioskId && (
           <div className="rounded-[1.35rem] border border-black/[0.08] bg-[#fbf3e6] px-4 py-4 text-sm text-[#6a5845]">
-            Sesión de quiosco detectada. Tras iniciar sesión entrarás directamente al flujo de escáner en este dispositivo.
+            {t('staff_kiosk_detected')}
           </div>
         )}
 
         <div className="space-y-1.5">
-          <label className={labelCls}>Correo Electrónico</label>
+          <label className={labelCls}>{t('staff_email_label')}</label>
           <Input
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            placeholder="camarero@cafeteria.es"
+            placeholder={t('staff_email_placeholder')}
             className={inputCls}
             type="email"
             autoComplete="email"
@@ -101,11 +103,11 @@ export const StaffLoginPage: React.FC = () => {
         </div>
 
         <div className="space-y-1.5">
-          <label className={labelCls}>PIN de Acceso</label>
+          <label className={labelCls}>{t('staff_pin_label')}</label>
           <Input
             value={pin}
             onChange={(event) => setPin(event.target.value)}
-            placeholder="4-6 dígitos"
+            placeholder={t('staff_pin_placeholder')}
             className={inputCls}
             type="password"
             inputMode="numeric"
@@ -115,19 +117,19 @@ export const StaffLoginPage: React.FC = () => {
         </div>
 
         <div className="space-y-1.5">
-          <label className={labelCls}>ID de Cafetería (Org ID)</label>
+          <label className={labelCls}>{t('staff_org_label')}</label>
           <Input
             value={orgId}
             onChange={(event) => setOrgId(event.target.value)}
-            placeholder="ID del negocio"
+            placeholder={t('staff_org_placeholder')}
             className={`${inputCls} font-mono`}
             required
             disabled={hasPrefilledOrgId}
           />
           <p className="text-xs leading-6 text-[#6d6658]">
             {hasPrefilledOrgId
-              ? "Este ID de Cafetería se ha completado automáticamente desde tu enlace de personal."
-              : "Solicita el ID de Cafetería al responsable si no dispones del enlace directo."}
+              ? t('staff_org_prefilled')
+              : t('staff_org_ask')}
           </p>
         </div>
 
@@ -142,14 +144,13 @@ export const StaffLoginPage: React.FC = () => {
           className="h-14 w-full rounded-[1.2rem] bg-[#1b1813] text-base font-semibold text-white shadow-none hover:bg-[#11100d]"
           disabled={busy}
         >
-          {busy ? "Iniciando sesión..." : "Entrar como Personal"}
+          {busy ? t('staff_logging_in') : t('staff_login_btn')}
           {!busy && <ArrowRight className="ml-2 h-4 w-4" />}
         </Button>
 
         <div className="rounded-[1.35rem] border border-black/[0.08] bg-[#f5f1e8] px-4 py-4 text-sm text-[#6d6658]">
-          ¿Acceso de propietario?{" "}
           <Link to="/login" className="font-semibold text-[#171512] underline-offset-2 hover:underline">
-            Ir al acceso principal
+            {t('staff_owner_login')}
           </Link>
         </div>
       </form>

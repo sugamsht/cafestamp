@@ -23,6 +23,8 @@ import { ScanDetectionResult, ScanQrDialog } from './ScanQrDialog';
 import { insertIssuedCard, updateIssuedCard, deleteIssuedCard, insertTransaction, inspectScannedCard, awardCustomerStamp, removeCustomerStamp, redeemCustomerReward } from '../lib/db/issuedCards';
 import { upsertCustomer } from '../lib/db/customers';
 import { useSubscriptionContext } from './SubscriptionContext';
+import { useLanguage } from '../lib/i18n/LanguageContext';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 interface IssuedCardsPageProps {
   customers: Customer[];
@@ -33,6 +35,7 @@ interface IssuedCardsPageProps {
 }
 
 export const IssuedCardsPage: React.FC<IssuedCardsPageProps> = ({ customers, campaigns, setCustomers, refreshData, dataReady = false }) => {
+  const { t } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const { currentOwner, isEmailVerified, isStaff, currentUser } = useAuth();
@@ -440,18 +443,18 @@ export const IssuedCardsPage: React.FC<IssuedCardsPageProps> = ({ customers, cam
     clearKioskQuery();
 
     if (!match) {
-      setMutationError("Tarjeta no encontrada. Intenta escanear de nuevo.");
+      setMutationError(t('issued_not_found'));
       return;
     }
 
     setMutationError("");
     setActiveKioskData(match);
-  }, [activeKioskData, clearKioskQuery, dataReady, findKioskMatch, searchParams]);
+  }, [activeKioskData, clearKioskQuery, dataReady, findKioskMatch, searchParams, t]);
 
   const handleScanResult = useCallback(async (value: string): Promise<ScanDetectionResult> => {
     const cardId = extractCardId(value);
     if (!cardId) {
-      return { ok: false, message: "El código QR no es válido. Intenta escanear de nuevo." };
+      return { ok: false, message: t('issued_invalid_qr') };
     }
 
     const match = findKioskMatch(cardId);
@@ -463,7 +466,7 @@ export const IssuedCardsPage: React.FC<IssuedCardsPageProps> = ({ customers, cam
 
     const inspection = await inspectScannedCard(cardId);
     if (inspection.status === 'foreign') {
-      return { ok: false, message: "Esta tarjeta no pertenece a tu cafetería." };
+      return { ok: false, message: t('issued_foreign_card') };
     }
 
     if (inspection.status === 'owned') {
@@ -478,8 +481,8 @@ export const IssuedCardsPage: React.FC<IssuedCardsPageProps> = ({ customers, cam
       return { ok: true };
     }
 
-    return { ok: false, message: "Tarjeta no encontrada. Intenta escanear de nuevo." };
-  }, [findKioskMatch, refreshData, setSearchParams]);
+    return { ok: false, message: t('issued_not_found') };
+  }, [findKioskMatch, refreshData, setSearchParams, t]);
 
   const flatList = customers.flatMap(c => c.cards.map(card => ({ customer: c, card })));
 
@@ -569,20 +572,21 @@ export const IssuedCardsPage: React.FC<IssuedCardsPageProps> = ({ customers, cam
 
       <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
         <div className="min-w-0">
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">Tarjetas Emitidas</h1>
-          <p className="text-sm text-muted-foreground md:text-base">Gestiona las tarjetas activas de clientes y accede al escáner/quiosco para sellar.</p>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">{t('issued_title')}</h1>
+          <p className="text-sm text-muted-foreground md:text-base">{t('issued_subtitle')}</p>
         </div>
         <div className="flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:w-auto lg:justify-end">
+          <LanguageSwitcher variant="toggle" />
           <Button variant="outline" className="w-full gap-2 rounded-full sm:w-auto" onClick={() => setIsScanOpen(true)}>
-            <QrCode size={16} /> Escanear QR
+            <QrCode size={16} /> {t('issued_scan_qr')}
           </Button>
           <div className="flex w-full flex-col gap-2 sm:w-auto sm:items-end">
             <Button onClick={openIssueWizard} className="w-full gap-2 rounded-full px-6 shadow-sm sm:w-auto" disabled={!canIssue}>
-              <Plus size={16} /> Emitir Nueva Tarjeta
+              <Plus size={16} /> {t('issued_new_card')}
             </Button>
             {!canIssue && (
               <div className="flex items-center gap-2 text-xs text-amber-600 sm:justify-end">
-                <Lock size={12} /> Confirma tu correo para emitir tarjetas.
+                <Lock size={12} /> {t('issued_confirm_email')}
               </div>
             )}
           </div>
@@ -599,7 +603,7 @@ export const IssuedCardsPage: React.FC<IssuedCardsPageProps> = ({ customers, cam
         <Search className="text-gray-400" size={20} />
         <input
           className="flex-1 outline-none text-sm bg-transparent placeholder:text-muted-foreground"
-          placeholder="Buscar tarjeta o cliente..."
+          placeholder={t('issued_search_placeholder')}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
@@ -608,7 +612,7 @@ export const IssuedCardsPage: React.FC<IssuedCardsPageProps> = ({ customers, cam
       <div className="rounded-xl border bg-white shadow-sm">
         {cardRows.length === 0 ? (
           <div className="flex h-32 items-center justify-center px-4 text-center text-sm text-muted-foreground">
-            No se encontraron tarjetas. Emite una para comenzar.
+            {t('issued_empty')}
           </div>
         ) : (
           <>
@@ -632,8 +636,8 @@ export const IssuedCardsPage: React.FC<IssuedCardsPageProps> = ({ customers, cam
                       <div className={cn("min-w-0", isRedeemed && "opacity-60")}>
                         <div className="flex flex-wrap items-center gap-2">
                           <h2 className="text-sm font-semibold text-foreground">{card.campaignName}</h2>
-                          {isArchivedCampaign && <Badge variant="outline" className="text-[10px] uppercase tracking-wide">Campaña archivada</Badge>}
-                          {isRedeemed && <span className="rounded bg-gray-200 px-1.5 py-0.5 text-[10px] font-bold uppercase text-gray-600">Canjeada</span>}
+                          {isArchivedCampaign && <Badge variant="outline" className="text-[10px] uppercase tracking-wide">{t('issued_badge_archived')}</Badge>}
+                          {isRedeemed && <span className="rounded bg-gray-200 px-1.5 py-0.5 text-[10px] font-bold uppercase text-gray-600">{t('issued_badge_redeemed')}</span>}
                         </div>
                         <p className="mt-1 truncate text-xs font-mono text-muted-foreground">ID: {card.uniqueId.slice(0, 8)}</p>
                       </div>
@@ -645,9 +649,9 @@ export const IssuedCardsPage: React.FC<IssuedCardsPageProps> = ({ customers, cam
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Gestionar Tarjeta</DropdownMenuLabel>
+                        <DropdownMenuLabel>{t('issued_manage')}</DropdownMenuLabel>
                         <DropdownMenuItem onClick={() => openPublicLink(card.uniqueId)}>
-                          <ExternalLink className="mr-2 h-4 w-4" /> Enlace Público
+                          <ExternalLink className="mr-2 h-4 w-4" /> {t('issued_public_link')}
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         {!isStaff && (
@@ -655,7 +659,7 @@ export const IssuedCardsPage: React.FC<IssuedCardsPageProps> = ({ customers, cam
                             className="text-red-600"
                             onClick={() => handleRevokeCard(customer.id, card.id)}
                           >
-                            <Trash className="mr-2 h-4 w-4" /> Revocar Tarjeta
+                            <Trash className="mr-2 h-4 w-4" /> {t('issued_revoke')}
                           </DropdownMenuItem>
                         )}
                       </DropdownMenuContent>
@@ -676,9 +680,9 @@ export const IssuedCardsPage: React.FC<IssuedCardsPageProps> = ({ customers, cam
 
                   <div className="mt-4 space-y-2">
                     <div className="flex items-center justify-between gap-3">
-                      <span className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">Progreso</span>
+                      <span className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">{t('issued_th_progress')}</span>
                       {isRedeemed ? (
-                        <span className="text-sm font-medium text-muted-foreground">Completada</span>
+                        <span className="text-sm font-medium text-muted-foreground">{t('issued_completed')}</span>
                       ) : (
                         <span className="text-sm font-bold text-foreground">
                           {card.stamps} <span className="font-normal text-muted-foreground">/ {campaign.totalStamps}</span>
@@ -703,7 +707,7 @@ export const IssuedCardsPage: React.FC<IssuedCardsPageProps> = ({ customers, cam
                       onClick={() => setActiveKioskData({ customer, card, template: campaign })}
                     >
                       {isRedeemed ? <Lock size={14} /> : <MonitorPlay size={14} />}
-                      {isRedeemed ? "Ver Tarjeta" : (canRedeem ? "Canjear Recompensa" : "Abrir Quiosco")}
+                      {isRedeemed ? t('issued_view_card') : (canRedeem ? t('issued_redeem_reward') : t('issued_open_kiosk'))}
                     </Button>
                   </div>
                 </div>
@@ -714,10 +718,10 @@ export const IssuedCardsPage: React.FC<IssuedCardsPageProps> = ({ customers, cam
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/30">
-                    <TableHead className="w-[300px]">Detalles de la Tarjeta</TableHead>
-                    <TableHead>Cliente</TableHead>
-                    <TableHead className="text-right">Progreso</TableHead>
-                    <TableHead className="text-right">Acción</TableHead>
+                    <TableHead className="w-[300px]">{t('issued_th_details')}</TableHead>
+                    <TableHead>{t('issued_th_customer')}</TableHead>
+                    <TableHead className="text-right">{t('issued_th_progress')}</TableHead>
+                    <TableHead className="text-right">{t('issued_th_action')}</TableHead>
                     <TableHead className="w-[50px]"></TableHead>
                   </TableRow>
                 </TableHeader>
@@ -735,8 +739,8 @@ export const IssuedCardsPage: React.FC<IssuedCardsPageProps> = ({ customers, cam
                           <div className={cn(isRedeemed && "opacity-60")}>
                             <div className="flex items-center gap-2 font-semibold text-foreground">
                               {card.campaignName}
-                              {isArchivedCampaign && <Badge variant="outline" className="text-[10px] uppercase tracking-wide">Campaña archivada</Badge>}
-                              {isRedeemed && <span className="rounded bg-gray-200 px-1.5 py-0.5 text-[10px] font-bold uppercase text-gray-600">Canjeada</span>}
+                              {isArchivedCampaign && <Badge variant="outline" className="text-[10px] uppercase tracking-wide">{t('issued_badge_archived')}</Badge>}
+                              {isRedeemed && <span className="rounded bg-gray-200 px-1.5 py-0.5 text-[10px] font-bold uppercase text-gray-600">{t('issued_badge_redeemed')}</span>}
                             </div>
                             <div className="font-mono text-xs text-muted-foreground">ID: {card.uniqueId.slice(0, 8)}</div>
                           </div>
@@ -752,7 +756,7 @@ export const IssuedCardsPage: React.FC<IssuedCardsPageProps> = ({ customers, cam
                       </TableCell>
                       <TableCell className="text-right">
                         {isRedeemed ? (
-                          <div className="text-sm font-medium text-muted-foreground">Completada</div>
+                          <div className="text-sm font-medium text-muted-foreground">{t('issued_completed')}</div>
                         ) : (
                           <div className="flex flex-col items-end gap-1">
                             <div className="text-sm font-bold">
@@ -774,8 +778,8 @@ export const IssuedCardsPage: React.FC<IssuedCardsPageProps> = ({ customers, cam
                             variant="outline"
                             className="h-9 w-9 rounded-full"
                             onClick={() => openPublicLink(card.uniqueId)}
-                            aria-label="Abrir enlace público"
-                            title="Abrir enlace público"
+                            aria-label={t('issued_public_link')}
+                            title={t('issued_public_link')}
                           >
                             <ExternalLink size={14} />
                           </Button>
@@ -786,7 +790,7 @@ export const IssuedCardsPage: React.FC<IssuedCardsPageProps> = ({ customers, cam
                             onClick={() => setActiveKioskData({ customer, card, template: campaign })}
                           >
                             {isRedeemed ? <Lock size={14} /> : <MonitorPlay size={14} />}
-                            {isRedeemed ? "Ver" : (canRedeem ? "Canjear" : "Quiosco")}
+                            {isRedeemed ? t('issued_view_short') : (canRedeem ? t('issued_redeem_short') : t('issued_kiosk_short'))}
                           </Button>
                         </div>
                       </TableCell>
@@ -798,9 +802,9 @@ export const IssuedCardsPage: React.FC<IssuedCardsPageProps> = ({ customers, cam
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Gestionar Tarjeta</DropdownMenuLabel>
+                            <DropdownMenuLabel>{t('issued_manage')}</DropdownMenuLabel>
                             <DropdownMenuItem onClick={() => openPublicLink(card.uniqueId)}>
-                              <ExternalLink className="mr-2 h-4 w-4" /> Enlace Público
+                              <ExternalLink className="mr-2 h-4 w-4" /> {t('issued_public_link')}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             {!isStaff && (
@@ -808,7 +812,7 @@ export const IssuedCardsPage: React.FC<IssuedCardsPageProps> = ({ customers, cam
                                 className="text-red-600"
                                 onClick={() => handleRevokeCard(customer.id, card.id)}
                               >
-                                <Trash className="mr-2 h-4 w-4" /> Revocar Tarjeta
+                                <Trash className="mr-2 h-4 w-4" /> {t('issued_revoke')}
                               </DropdownMenuItem>
                             )}
                           </DropdownMenuContent>

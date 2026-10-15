@@ -9,6 +9,8 @@ import { Plus, Gift, History, User, ChevronLeft, Minus, Lock, CheckCircle, Refre
 import { cn } from '../lib/utils';
 import { formatDateTime } from '../lib/locale';
 import type { AwardStampResult, RedeemRewardResult } from '../lib/db/issuedCards';
+import { useLanguage } from '../lib/i18n/LanguageContext';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 interface KioskModeProps {
   customer: Customer;
@@ -35,14 +37,15 @@ const createTransaction = (
     amount: number,
     title: string,
     remarks?: string,
-    actor?: { id?: string; name: string; role: 'owner' | 'staff' }
+    actor?: { id?: string; name: string; role: 'owner' | 'staff' },
+    language: 'es' | 'en' = 'es'
 ): Transaction => {
     const now = new Date();
     return {
         id: `tx-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         type,
         amount,
-        date: formatDateTime(now),
+        date: formatDateTime(now, language),
         timestamp: now.getTime(),
         title,
         remarks,
@@ -52,20 +55,20 @@ const createTransaction = (
     };
 };
 
-const formatKioskAction = (type: Transaction['type']) => {
+const formatKioskAction = (type: Transaction['type'], language: 'es' | 'en') => {
     switch (type) {
         case 'issued':
-            return 'Tarjeta emitida';
+            return language === 'es' ? 'Tarjeta emitida' : 'Card issued';
         case 'redeem':
-            return 'Recompensa canjeada';
+            return language === 'es' ? 'Recompensa canjeada' : 'Reward redeemed';
         case 'stamp_remove':
-            return 'Sello corregido';
+            return language === 'es' ? 'Sello corregido' : 'Stamp removed';
         default:
-            return 'Sello añadido';
+            return language === 'es' ? 'Sello añadido' : 'Stamp added';
     }
 };
 
-const formatKioskTimestamp = (timestamp: number) => formatDateTime(timestamp);
+const formatKioskTimestamp = (timestamp: number, language: 'es' | 'en') => formatDateTime(timestamp, language);
 
 export const KioskMode: React.FC<KioskModeProps> = ({
   customer,
@@ -84,6 +87,7 @@ export const KioskMode: React.FC<KioskModeProps> = ({
   actorRole,
   mutationBusy = false
 }) => {
+  const { t, language } = useLanguage();
   const [isAnimating, setIsAnimating] = useState(false);
   const [actionError, setActionError] = useState("");
   const [cooldownRemaining, setCooldownRemaining] = useState<number | null>(null);
@@ -99,33 +103,33 @@ export const KioskMode: React.FC<KioskModeProps> = ({
   const remainingStamps = Math.max(template.totalStamps - card.stamps, 0);
   const recentHistory = [...card.history]
     .sort((a, b) => b.timestamp - a.timestamp);
-  const customerMeta = customer.mobile || customer.email || 'Sin datos de contacto';
-  const operatorLabel = actorRole === 'staff' ? 'Sesión de personal' : 'Sesión de propietario';
+  const customerMeta = customer.mobile || customer.email || (language === 'es' ? 'Sin datos de contacto' : 'No contact details');
+  const operatorLabel = actorRole === 'staff' ? t('kiosk_staff_session') : t('kiosk_owner_session');
   const confirmCopy = (() => {
       switch (confirmAction) {
           case 'stamp':
               return {
-                  title: 'Confirmar Sello',
-                  description: `¿Añadir 1 sello a la tarjeta de ${customer.name}?`,
-                  buttonLabel: 'Añadir Sello',
+                  title: t('kiosk_confirm_stamp_title'),
+                  description: t('kiosk_confirm_stamp_desc', { name: customer.name }),
+                  buttonLabel: t('kiosk_add_stamp'),
                   icon: Plus,
                   accentClassName: 'bg-[#eef5e8] text-[#4c7a2b]',
                   buttonClassName: 'bg-[#1d1d1f] hover:bg-black',
               };
           case 'remove':
               return {
-                  title: 'Quitar Sello',
-                  description: `¿Quitar 1 sello de la tarjeta de ${customer.name}?`,
-                  buttonLabel: 'Quitar Sello',
+                  title: t('kiosk_confirm_remove_title'),
+                  description: t('kiosk_confirm_remove_desc', { name: customer.name }),
+                  buttonLabel: t('kiosk_remove_stamp'),
                   icon: Minus,
                   accentClassName: 'bg-rose-100 text-rose-600',
                   buttonClassName: '',
               };
           case 'redeem':
               return {
-                  title: 'Confirmar Canje',
-                  description: `Completar la tarjeta de ${customer.name} y canjear su consumición gratuita.`,
-                  buttonLabel: 'Confirmar y Canjear',
+                  title: t('kiosk_confirm_redeem_title'),
+                  description: t('kiosk_confirm_redeem_desc', { name: customer.name }),
+                  buttonLabel: t('kiosk_confirm_redeem_btn'),
                   icon: Gift,
                   accentClassName: 'bg-[#fff2de] text-[#cf6d1b]',
                   buttonClassName: 'bg-[#cf6d1b] hover:bg-[#b75e14]',
@@ -260,15 +264,16 @@ export const KioskMode: React.FC<KioskModeProps> = ({
       <div className="relative flex min-h-screen flex-col md:h-full md:min-h-0 md:flex-row">
       {/* LEFT: Card Visual */}
       <div className="relative flex min-h-screen w-full shrink-0 flex-col border-b border-black/5 bg-[linear-gradient(180deg,#f9f7f0_0%,#efece1_100%)] px-4 pb-6 pt-4 md:h-full md:min-h-0 md:w-1/2 md:border-b-0 md:border-r md:px-6 md:pb-8 md:pt-6 lg:w-5/12">
-        <div className="mb-4 flex items-center md:mb-6">
+        <div className="mb-4 flex items-center justify-between md:mb-6">
           <Button
             variant="outline"
             onClick={onClose}
             className="rounded-full border-black/10 bg-white/80 px-4 backdrop-blur hover:bg-white"
           >
             <ChevronLeft size={18} className="mr-2" />
-            Back
+            {t('kiosk_back')}
           </Button>
+          <LanguageSwitcher variant="toggle" />
         </div>
 
         <div className="flex flex-1 items-start justify-center pt-2 sm:pt-4 md:items-center md:pt-0">
@@ -304,15 +309,15 @@ export const KioskMode: React.FC<KioskModeProps> = ({
                             <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
                                 <CheckCircle size={32} />
                             </div>
-                            <h3 className="text-xl font-bold text-[#1d1d1f]">Reward claimed</h3>
-                            <p className="mt-1 text-sm text-[#5f6368]">This card is closed.</p>
+                            <h3 className="text-xl font-bold text-[#1d1d1f]">{t('kiosk_reward_claimed')}</h3>
+                            <p className="mt-1 text-sm text-[#5f6368]">{t('kiosk_card_closed')}</p>
                         </div>
                     </div>
                 )}
             </div>
             {!isLocked && (
               <p className="mt-3 text-center text-xs font-medium tracking-wide text-[#5f6368] sm:text-sm">
-                Tap the next empty stamp to add. Tap a filled stamp to remove.
+                {t('kiosk_tap_instruction')}
               </p>
             )}
           </div>
@@ -326,7 +331,7 @@ export const KioskMode: React.FC<KioskModeProps> = ({
         <div className="md:flex-1 md:overflow-y-auto">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 p-4 sm:p-6 md:gap-6 md:p-8">
             <div className="rounded-[20px] border border-black/5 bg-white/85 px-4 py-3 shadow-[0_18px_45px_-34px_rgba(0,0,0,0.3)] backdrop-blur">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#6b705c]">Card ID</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#6b705c]">{t('kiosk_card_id')}</p>
                 <p className="mt-1 break-all font-mono text-sm text-[#1d1d1f]">{card.uniqueId}</p>
             </div>
 
@@ -334,7 +339,7 @@ export const KioskMode: React.FC<KioskModeProps> = ({
                 <div className="rounded-[24px] border border-black/5 bg-white p-5 shadow-[0_18px_45px_-34px_rgba(0,0,0,0.3)]">
                     <div className="flex items-start justify-between gap-3">
                         <div>
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#6b705c]">Customer</p>
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#6b705c]">{t('kiosk_customer_label')}</p>
                             <p className="mt-3 text-lg font-semibold text-[#1d1d1f]">{customer.name}</p>
                             <p className="mt-1 break-all text-sm text-[#5f6368]">{customerMeta}</p>
                         </div>
@@ -347,8 +352,8 @@ export const KioskMode: React.FC<KioskModeProps> = ({
                 <div className="rounded-[24px] border border-black/5 bg-white p-5 shadow-[0_18px_45px_-34px_rgba(0,0,0,0.3)]">
                     <div className="flex items-start justify-between gap-3">
                         <div>
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#6b705c]">Estado del premio</p>
-                            <p className="mt-3 text-lg font-semibold text-[#1d1d1f]">{isLocked ? 'Canjeada' : canRedeem ? '¡Listo para canjear!' : `Faltan ${remainingStamps} sellos`}</p>
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#6b705c]">{t('kiosk_reward_status')}</p>
+                            <p className="mt-3 text-lg font-semibold text-[#1d1d1f]">{isLocked ? t('kiosk_status_completed') : canRedeem ? t('kiosk_status_claim') : t('kiosk_status_remaining', { n: remainingStamps })}</p>
                             <p className="mt-1 text-sm text-[#5f6368]">{template.rewardName}</p>
                         </div>
                         <div className={cn(
@@ -363,7 +368,7 @@ export const KioskMode: React.FC<KioskModeProps> = ({
                 <div className="rounded-[24px] border border-black/5 bg-white p-5 shadow-[0_18px_45px_-34px_rgba(0,0,0,0.3)]">
                     <div className="flex items-start justify-between gap-3">
                         <div>
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#6b705c]">Sesión</p>
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#6b705c]">{t('kiosk_session')}</p>
                             <p className="mt-3 text-lg font-semibold text-[#1d1d1f]">{operatorLabel}</p>
                             <p className="mt-1 text-sm text-[#5f6368]">{actorName}</p>
                         </div>
@@ -386,16 +391,16 @@ export const KioskMode: React.FC<KioskModeProps> = ({
                     <div className="flex h-full flex-col items-center justify-center gap-6 py-2 text-center">
                         <div className="space-y-2">
                         <Lock size={48} className="mx-auto text-gray-300" />
-                        <h2 className="text-xl font-bold text-[#1d1d1f] sm:text-2xl">Recompensa Canjeada</h2>
+                        <h2 className="text-xl font-bold text-[#1d1d1f] sm:text-2xl">{t('kiosk_locked_title')}</h2>
                         <p className="mx-auto max-w-md text-sm text-[#5f6368] sm:text-base">
-                            Esta tarjeta fue completada y canjeada el {card.completedDate || 'hoy'}. Para seguir acumulando sellos, emite una nueva tarjeta.
+                            {t('kiosk_locked_desc', { date: card.completedDate || t('kiosk_today') })}
                         </p>
                         </div>
                     <Button size="lg" onClick={handleIssueNext} className="h-12 w-full gap-2 rounded-full bg-[#1d1d1f] px-6 text-base text-white shadow-lg hover:bg-black sm:h-14 sm:w-auto sm:px-8 sm:text-lg" disabled={!canIssue}>
-                        <RefreshCcw size={20} /> Emitir Nueva Tarjeta
+                        <RefreshCcw size={20} /> {t('kiosk_issue_new_btn')}
                     </Button>
                     {!canIssue && (
-                        <div className="text-xs text-amber-700">Verify your email to issue cards.</div>
+                        <div className="text-xs text-amber-700">{t('issued_confirm_email')}</div>
                     )}
                 </div>
                 </div>
@@ -404,11 +409,11 @@ export const KioskMode: React.FC<KioskModeProps> = ({
                 <div className="rounded-[30px] border border-black/5 bg-white p-4 shadow-[0_28px_60px_-40px_rgba(0,0,0,0.32)] sm:p-6">
                 <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                     <div>
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b705c]">Acciones</p>
-                        <h2 className="mt-2 text-2xl font-bold tracking-tight text-[#1d1d1f]">Controles de barra</h2>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b705c]">{t('kiosk_actions')}</p>
+                        <h2 className="mt-2 text-2xl font-bold tracking-tight text-[#1d1d1f]">{t('kiosk_counter_controls')}</h2>
                     </div>
                     <p className="max-w-md text-sm text-[#5f6368]">
-                        Añade sellos al instante o canjea la consumición cuando se complete la tarjeta.
+                        {t('kiosk_counter_controls_sub')}
                     </p>
                 </div>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
@@ -436,15 +441,15 @@ export const KioskMode: React.FC<KioskModeProps> = ({
                               "rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em]",
                               !canAdd ? "bg-white text-[#6e6e73]" : "bg-white/15 text-white"
                             )}>
-                              Principal
+                              {t('kiosk_primary')}
                             </span>
                           </div>
                           <div>
-                            <span className={cn("block text-2xl font-bold tracking-tight", !canAdd && "text-[#4c4c52]")}>Añadir Sello</span>
-                            <span className={cn("mt-2 block text-sm leading-6", !canAdd ? "text-[#6e6e73]" : "text-white/78")}>Registra una consumición al instante para agilizar la cola de clientes en barra.</span>
+                            <span className={cn("block text-2xl font-bold tracking-tight", !canAdd && "text-[#4c4c52]")}>{t('kiosk_add_stamp')}</span>
+                            <span className={cn("mt-2 block text-sm leading-6", !canAdd ? "text-[#6e6e73]" : "text-white/78")}>{t('kiosk_add_stamp_sub')}</span>
                           </div>
                           <div className={cn("text-sm font-medium", !canAdd ? "text-[#6e6e73]" : "text-white/84")}>
-                            {canAdd ? `Faltan ${remainingStamps} sellos para el premio` : 'Tarjeta con el máximo de sellos'}
+                            {canAdd ? t('kiosk_more_until', { n: remainingStamps }) : t('kiosk_max_reached')}
                           </div>
                         </div>
                     </button>
@@ -474,15 +479,15 @@ export const KioskMode: React.FC<KioskModeProps> = ({
                                   "rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em]",
                                   canRedeem ? "bg-white/70 text-[#8a4a11]" : "bg-white text-[#8c8c91]"
                                 )}>
-                                  {canRedeem ? 'Desbloqueado' : 'Pendiente'}
+                                  {canRedeem ? t('kiosk_status_unlocked') : t('kiosk_status_standby')}
                                 </span>
                               </div>
                               <div>
-                                <span className={cn("block text-2xl font-bold tracking-tight", canRedeem ? "text-[#8a4a11]" : "text-[#4c4c52]")}>Canjear Recompensa</span>
-                                <span className="mt-2 block text-sm leading-6 text-[#6b5b49]">Finaliza la tarjeta y confirma la entrega del premio una vez completados todos los sellos.</span>
+                                <span className={cn("block text-2xl font-bold tracking-tight", canRedeem ? "text-[#8a4a11]" : "text-[#4c4c52]")}>{t('kiosk_redeem_reward')}</span>
+                                <span className="mt-2 block text-sm leading-6 text-[#6b5b49]">{t('kiosk_redeem_reward_sub')}</span>
                               </div>
                               <div className={cn("text-sm font-medium", canRedeem ? "text-[#8a4a11]" : "text-[#6e6e73]")}>
-                                {canRedeem ? template.rewardName : `Faltan ${remainingStamps} sello${remainingStamps === 1 ? '' : 's'}`}
+                                {canRedeem ? template.rewardName : t('kiosk_status_remaining', { n: remainingStamps })}
                               </div>
                             </div>
                         </button>
@@ -493,10 +498,10 @@ export const KioskMode: React.FC<KioskModeProps> = ({
                                   <Lock size={26} />
                               </div>
                               <div>
-                                  <span className="block text-2xl font-bold tracking-tight text-[#4c4c52]">Canje restringido</span>
-                                  <span className="mt-2 block text-sm leading-6 text-[#6e6e73]">El canje requiere autorización del propietario de la cafetería.</span>
+                                  <span className="block text-2xl font-bold tracking-tight text-[#4c4c52]">{t('kiosk_redeem_locked')}</span>
+                                  <span className="mt-2 block text-sm leading-6 text-[#6e6e73]">{t('kiosk_redeem_locked_sub')}</span>
                               </div>
-                              <div className="text-sm font-medium text-[#6e6e73]">Requiere permiso de propietario</div>
+                              <div className="text-sm font-medium text-[#6e6e73]">{t('kiosk_owner_required')}</div>
                             </div>
                         </div>
                     )}
@@ -520,9 +525,9 @@ export const KioskMode: React.FC<KioskModeProps> = ({
                     >
                         <div className="flex items-start justify-between gap-3">
                           <div>
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#6b705c]">Corrección</p>
-                            <p className={cn("mt-2 text-lg font-semibold", canRemove ? "text-[#7a1f1f]" : "text-[#6e6e73]")}>Quitar Sello</p>
-                            <p className="mt-2 text-sm text-[#5f6368]">Úsalo si se anotó un sello por error y se requiere ajustar el saldo de la tarjeta.</p>
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#6b705c]">{t('kiosk_correction')}</p>
+                            <p className={cn("mt-2 text-lg font-semibold", canRemove ? "text-[#7a1f1f]" : "text-[#6e6e73]")}>{t('kiosk_remove_stamp')}</p>
+                            <p className="mt-2 text-sm text-[#5f6368]">{t('kiosk_remove_stamp_sub')}</p>
                           </div>
                           <div className={cn(
                             "flex h-11 w-11 items-center justify-center rounded-2xl",
@@ -536,9 +541,9 @@ export const KioskMode: React.FC<KioskModeProps> = ({
                     <div className="rounded-[24px] border border-black/5 bg-[#f8f7f2] p-5">
                         <div className="flex items-start justify-between gap-3">
                           <div>
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#6b705c]">Visita</p>
-                            <p className="mt-2 text-lg font-semibold text-[#1d1d1f]">Última visita</p>
-                            <p className="mt-2 text-sm text-[#5f6368]">{card.lastVisit || 'Hoy'}</p>
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#6b705c]">{t('kiosk_visit')}</p>
+                            <p className="mt-2 text-lg font-semibold text-[#1d1d1f]">{t('kiosk_last_visit')}</p>
+                            <p className="mt-2 text-sm text-[#5f6368]">{card.lastVisit || t('kiosk_today')}</p>
                           </div>
                           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-[#5f6368]">
                             <Clock3 size={18} />
@@ -551,8 +556,8 @@ export const KioskMode: React.FC<KioskModeProps> = ({
             <div className="rounded-[30px] border border-black/5 bg-white p-5 shadow-[0_28px_60px_-40px_rgba(0,0,0,0.32)] sm:p-6">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b705c]">Actividad reciente</p>
-                    <h2 className="mt-2 text-xl font-bold tracking-tight text-[#1d1d1f]">Historial de sellos</h2>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b705c]">{t('kiosk_recent_activity')}</p>
+                    <h2 className="mt-2 text-xl font-bold tracking-tight text-[#1d1d1f]">{t('kiosk_timeline')}</h2>
                     </div>
                     <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#f5f4ef] text-[#1d1d1f]">
                         <History size={18} />
@@ -561,7 +566,7 @@ export const KioskMode: React.FC<KioskModeProps> = ({
 
                 {recentHistory.length === 0 ? (
                     <div className="mt-6 rounded-[24px] border border-dashed border-black/10 bg-[#f8f7f2] px-4 py-10 text-center text-sm text-[#5f6368]">
-                        No activity recorded yet.
+                        {t('card_no_activity')}
                     </div>
                 ) : (
                     <div className="mt-6 space-y-3">
@@ -583,9 +588,9 @@ export const KioskMode: React.FC<KioskModeProps> = ({
                                     </div>
                                     <div className="min-w-0 flex-1">
                                         <div className="flex flex-wrap items-center gap-2">
-                                            <p className="font-semibold text-[#1d1d1f]">{formatKioskAction(entry.type)}</p>
+                                            <p className="font-semibold text-[#1d1d1f]">{formatKioskAction(entry.type, language)}</p>
                                             <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-medium text-[#6e6e73] ring-1 ring-black/5">
-                                                {formatKioskTimestamp(entry.timestamp)}
+                                                {formatKioskTimestamp(entry.timestamp, language)}
                                             </span>
                                         </div>
                                         <p className="mt-1 text-sm text-[#5f6368]">
@@ -631,13 +636,13 @@ export const KioskMode: React.FC<KioskModeProps> = ({
                     <div className="rounded-[24px] border border-black/5 bg-white/80 p-4">
                         <div className="flex items-center justify-between gap-3">
                             <div>
-                                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#6b705c]">Cliente</p>
+                                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#6b705c]">{t('kiosk_customer_label')}</p>
                                 <p className="mt-1 text-base font-semibold text-[#1d1d1f]">{customer.name}</p>
                             </div>
-                            <p className="text-sm text-[#5f6368]">{card.stamps}/{template.totalStamps} sellos</p>
+                            <p className="text-sm text-[#5f6368]">{t('kiosk_stamps_count', { current: card.stamps, total: template.totalStamps })}</p>
                         </div>
                         <p className="mt-3 text-sm text-[#5f6368]">
-                            Premio: <span className="font-medium text-[#1d1d1f]">{template.rewardName}</span>
+                            {t('kiosk_reward_label')}: <span className="font-medium text-[#1d1d1f]">{template.rewardName}</span>
                         </p>
                     </div>
 
@@ -655,7 +660,7 @@ export const KioskMode: React.FC<KioskModeProps> = ({
                                         onClick={() => handleConfirmAction(true)}
                                         disabled={mutationBusy}
                                     >
-                                        Añadir sello de todas formas (Excepción)
+                                        {t('kiosk_bypass_cooldown_btn')}
                                     </Button>
                                 )}
                             </div>
@@ -665,13 +670,13 @@ export const KioskMode: React.FC<KioskModeProps> = ({
                     {confirmAction === 'redeem' && (
                         <div className="space-y-3">
                             <div className="rounded-[20px] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                                Esta acción completará la tarjeta y la bloqueará permanentemente. Se emitirá una nueva tarjeta para futuras consumiciones.
+                                {t('kiosk_redeem_permanent_warn')}
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="remarks">Observaciones del canje (Opcional)</Label>
+                                <Label htmlFor="remarks">{t('kiosk_remarks_label')}</Label>
                                 <Input 
                                     id="remarks" 
-                                    placeholder="Ej. Café y bollería entregados en barra..."
+                                    placeholder={t('kiosk_remarks_placeholder')}
                                     value={redemptionRemarks}
                                     onChange={(e) => setRedemptionRemarks(e.target.value)}
                                 />
@@ -682,15 +687,15 @@ export const KioskMode: React.FC<KioskModeProps> = ({
             )}
 
             <DialogFooter className="gap-2 border-t border-black/5 bg-white/70 px-6 py-4 sm:gap-2">
-                <Button variant="outline" className="rounded-full border-black/10" onClick={() => setConfirmAction(null)} disabled={mutationBusy}>Cancelar</Button>
+                <Button variant="outline" className="rounded-full border-black/10" onClick={() => setConfirmAction(null)} disabled={mutationBusy}>{t('cancel')}</Button>
                 
                 {confirmAction === 'remove' ? (
                     <Button variant="destructive" className="rounded-full" onClick={handleConfirmAction} disabled={mutationBusy}>
-                        {mutationBusy ? "Guardando..." : confirmCopy?.buttonLabel}
+                        {mutationBusy ? t('saving') : confirmCopy?.buttonLabel}
                     </Button>
                 ) : (
                     <Button className={cn("rounded-full", confirmCopy?.buttonClassName)} onClick={handleConfirmAction} disabled={mutationBusy}>
-                        {mutationBusy ? "Guardando..." : confirmCopy?.buttonLabel}
+                        {mutationBusy ? t('saving') : confirmCopy?.buttonLabel}
                     </Button>
                 )}
             </DialogFooter>

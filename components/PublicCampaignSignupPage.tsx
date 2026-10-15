@@ -6,10 +6,11 @@ import { Button } from './ui/button';
 import { fetchPublicCampaignSignupContext, registerPublicCampaignSignup } from '../lib/db/publicSignup';
 import { isSupabaseConfigured } from '../lib/supabase';
 import { ShieldCheck, Info } from 'lucide-react';
-
-const SERVICE_UNAVAILABLE_MESSAGE = 'El servicio no está disponible temporalmente. Por favor, inténtalo más tarde.';
+import { useLanguage } from '../lib/i18n/LanguageContext';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 export const PublicCampaignSignupPage: React.FC = () => {
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
   const { slug, campaignId } = useParams<{ slug: string; campaignId: string }>();
   const [loading, setLoading] = useState(true);
@@ -53,15 +54,15 @@ export const PublicCampaignSignupPage: React.FC = () => {
 
     const trimmedName = name.trim();
     if (!trimmedName) {
-      setError('Por favor, introduce tu nombre.');
+      setError(t('signup_name_required'));
       return;
     }
     if (!privacyAccepted) {
-      setError('Debes aceptar la política de privacidad y las condiciones para obtener tu tarjeta.');
+      setError(t('signup_privacy_required'));
       return;
     }
     if (!slug || !campaignId) {
-      setError('Enlace de registro no válido.');
+      setError(t('signup_invalid_link'));
       return;
     }
 
@@ -77,8 +78,8 @@ export const PublicCampaignSignupPage: React.FC = () => {
     if (result.outcome === 'issued' || result.outcome === 'redirect_existing') {
       setPreRedirectMessage(
         result.outcome === 'issued'
-          ? 'Generando tu tarjeta de fidelización. Por favor, espera...'
-          : 'Accediendo a tu tarjeta de fidelización. Por favor, espera...'
+          ? t('signup_gen_wait')
+          : t('signup_redirect_wait')
       );
       await new Promise((resolve) => setTimeout(resolve, 900));
       navigate(`/${slug}/${result.uniqueId}`, { replace: true });
@@ -88,13 +89,11 @@ export const PublicCampaignSignupPage: React.FC = () => {
     setSubmitting(false);
 
     if (result.outcome === 'campaign_disabled_no_existing') {
-      setError(
-        'Los nuevos registros están pausados temporalmente para esta campaña. Si ya tienes una tarjeta en curso, introduce el mismo correo o teléfono que utilizaste anteriormente.'
-      );
+      setError(t('signup_paused'));
       return;
     }
 
-    setError(result.error || 'No se pudo completar el registro. Inténtalo de nuevo.');
+    setError(result.error || t('signup_service_unavailable'));
   };
 
   if (loading) {
@@ -108,7 +107,7 @@ export const PublicCampaignSignupPage: React.FC = () => {
   if (!isSupabaseConfigured) {
     return (
       <div className="h-screen flex items-center justify-center px-6 text-center text-muted-foreground">
-        {SERVICE_UNAVAILABLE_MESSAGE}
+        {t('signup_service_unavailable')}
       </div>
     );
   }
@@ -116,7 +115,7 @@ export const PublicCampaignSignupPage: React.FC = () => {
   if (!context) {
     return (
       <div className="h-screen flex items-center justify-center px-6 text-center text-muted-foreground">
-        El enlace del programa de fidelización no es válido o ha expirado.
+        {t('signup_invalid_link')}
       </div>
     );
   }
@@ -138,38 +137,41 @@ export const PublicCampaignSignupPage: React.FC = () => {
       )}
       <div className="mx-auto w-full max-w-xl">
         <section className="rounded-[2rem] border border-black/[0.08] bg-white p-6 shadow-[0_24px_64px_-38px_rgba(0,0,0,0.35)] sm:p-8">
-          <div className="flex items-center justify-between">
-            <p className="text-[0.68rem] font-semibold uppercase tracking-[0.26em] text-[#6e6e73]">
-              Tarjeta de Fidelización
-            </p>
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[0.68rem] font-semibold text-emerald-700 border border-emerald-200">
-              <ShieldCheck size={12} /> RGPD / España
-            </span>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.26em] text-[#6e6e73]">
+                {t('signup_tagline')}
+              </p>
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[0.68rem] font-semibold text-emerald-700 border border-emerald-200">
+                <ShieldCheck size={12} /> {t('signup_rgpd_badge')}
+              </span>
+            </div>
+            <LanguageSwitcher variant="toggle" />
           </div>
 
           <h1 className="mt-3 text-[clamp(1.9rem,5vw,2.7rem)] font-black leading-[0.96] tracking-[-0.03em] text-[#1d1d1f]">
             {context.owner.businessName}
           </h1>
           <p className="mt-3 text-[0.98rem] leading-7 text-[#4f5258]">
-            Únete a <span className="font-semibold text-[#1d1d1f]">{context.campaign.name}</span> y empieza a acumular sellos con cada consumición.
+            {t('signup_join_campaign', { campaign: context.campaign.name })}
           </p>
 
           {disabled && (
             <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-800">
-              Los nuevos registros están temporalmente pausados para esta campaña. Si ya tienes una tarjeta en curso, introduce el mismo correo o teléfono para continuar.
+              {t('signup_paused')}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="mt-6 space-y-5">
             <div className="grid gap-2">
               <Label htmlFor="name" className="text-sm font-medium text-[#1d1d1f]">
-                Nombre completo <span className="text-[#d73a49]">*</span>
+                {t('signup_full_name')} <span className="text-[#d73a49]">*</span>
               </Label>
               <Input
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Ej. María García"
+                placeholder={t('signup_name_placeholder')}
                 autoComplete="name"
                 required
                 className="h-12 rounded-xl border-black/10 text-[#1d1d1f] placeholder:text-[#8f9197]"
@@ -178,36 +180,36 @@ export const PublicCampaignSignupPage: React.FC = () => {
 
             <div className="grid gap-2">
               <Label htmlFor="email" className="text-sm font-medium text-[#1d1d1f]">
-                Correo electrónico <span className="text-[#6e6e73] font-normal">(Opcional)</span>
+                {t('signup_email')} <span className="text-[#6e6e73] font-normal">({t('optional')})</span>
               </Label>
               <Input
                 id="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="maria@ejemplo.es"
+                placeholder={t('signup_email_placeholder')}
                 autoComplete="email"
                 type="email"
                 className="h-12 rounded-xl border-black/10 text-[#1d1d1f] placeholder:text-[#8f9197]"
               />
               <p className="text-xs leading-5 text-[#6e6e73]">
-                Te permite recuperar tu tarjeta en cualquier dispositivo y recibir aviso de tus recompensas.
+                {t('signup_email_helper')}
               </p>
             </div>
 
             <div className="grid gap-2">
               <Label htmlFor="mobile" className="text-sm font-medium text-[#1d1d1f]">
-                Teléfono móvil <span className="text-[#6e6e73] font-normal">(Opcional)</span>
+                {t('signup_mobile')} <span className="text-[#6e6e73] font-normal">({t('optional')})</span>
               </Label>
               <Input
                 id="mobile"
                 value={mobile}
                 onChange={(e) => setMobile(e.target.value)}
-                placeholder="+34 612 34 56 78"
+                placeholder={t('signup_mobile_placeholder')}
                 autoComplete="tel"
                 className="h-12 rounded-xl border-black/10 text-[#1d1d1f] placeholder:text-[#8f9197]"
               />
               <p className="text-xs leading-5 text-[#6e6e73]">
-                Formato español (+34 6XX XX XX XX). Ayuda al camarero a localizar tu tarjeta en barra.
+                {t('signup_mobile_helper')}
               </p>
             </div>
 
@@ -222,9 +224,7 @@ export const PublicCampaignSignupPage: React.FC = () => {
                   className="mt-0.5 h-4 w-4 rounded border-gray-300 text-black focus:ring-black accent-[#1d1d1f]"
                 />
                 <span>
-                  He leído y acepto las <span className="font-semibold text-[#1d1d1f]">condiciones del programa de fidelización</span> y la{' '}
-                  <span className="font-semibold text-[#1d1d1f]">política de privacidad</span>.{' '}
-                  <span className="text-[#d73a49]">*</span>
+                  {t('signup_privacy_consent')} <span className="text-[#d73a49]">*</span>
                 </span>
               </label>
 
@@ -236,7 +236,7 @@ export const PublicCampaignSignupPage: React.FC = () => {
                   className="mt-0.5 h-4 w-4 rounded border-gray-300 text-black focus:ring-black accent-[#1d1d1f]"
                 />
                 <span>
-                  (Opcional) Deseo recibir ofertas exclusivas, novedades y promociones especiales del café por correo electrónico o SMS.
+                  {t('signup_marketing_consent')}
                 </span>
               </label>
             </div>
@@ -252,7 +252,7 @@ export const PublicCampaignSignupPage: React.FC = () => {
               className="h-12 w-full rounded-xl bg-[#1d1d1f] text-sm font-semibold text-white hover:bg-black/85 transition-all shadow-sm"
               disabled={submitting}
             >
-              {submitting ? 'Comprobando tarjeta...' : 'Obtener mi tarjeta de sellos'}
+              {submitting ? t('signup_checking') : t('signup_get_card_btn')}
             </Button>
           </form>
 
@@ -260,32 +260,32 @@ export const PublicCampaignSignupPage: React.FC = () => {
           <div className="mt-8 rounded-2xl bg-[#f5f5f7] p-4 text-[0.72rem] text-[#6e6e73] space-y-2 border border-black/5">
             <div className="flex items-center justify-between">
               <span className="font-semibold uppercase tracking-wider text-[#1d1d1f] flex items-center gap-1.5 text-[0.68rem]">
-                <Info size={13} className="text-[#1d1d1f]" /> Información sobre Protección de Datos (RGPD)
+                <Info size={13} className="text-[#1d1d1f]" /> {t('signup_privacy_info_title')}
               </span>
               <button
                 type="button"
                 onClick={() => setShowPrivacyDetails(!showPrivacyDetails)}
                 className="text-xs font-medium text-[#1d1d1f] underline hover:opacity-75"
               >
-                {showPrivacyDetails ? 'Menos info' : 'Más info'}
+                {showPrivacyDetails ? t('signup_privacy_less') : t('signup_privacy_more')}
               </button>
             </div>
 
             <p className="leading-relaxed">
-              <strong className="text-[#1d1d1f]">Responsable:</strong> {context.owner.businessName} &middot;{' '}
-              <strong className="text-[#1d1d1f]">Finalidad:</strong> Gestión y emisión de la tarjeta digital de fidelización, cómputo de sellos y canje de consumiciones gratuitas.
+              <strong className="text-[#1d1d1f]">{t('signup_privacy_controller')}:</strong> {context.owner.businessName} &middot;{' '}
+              <strong className="text-[#1d1d1f]">{t('signup_privacy_purpose')}:</strong> {t('signup_privacy_purpose_desc')}
             </p>
 
             {showPrivacyDetails && (
               <div className="space-y-1.5 pt-1 border-t border-black/5 text-[#6e6e73] leading-relaxed">
                 <p>
-                  <strong className="text-[#1d1d1f]">Legitimación:</strong> Consentimiento del interesado (art. 6.1.a RGPD) y ejecución de las condiciones del programa.
+                  <strong className="text-[#1d1d1f]">{t('signup_privacy_legal_basis')}:</strong> {t('signup_privacy_legal_basis_desc')}
                 </p>
                 <p>
-                  <strong className="text-[#1d1d1f]">Destinatarios:</strong> No se cederán datos a terceros ajenos a la prestación del servicio técnico ni se realizarán transferencias internacionales no autorizadas.
+                  <strong className="text-[#1d1d1f]">{t('signup_privacy_recipients')}:</strong> {t('signup_privacy_recipients_desc')}
                 </p>
                 <p>
-                  <strong className="text-[#1d1d1f]">Derechos:</strong> Puedes ejercitar tus derechos de acceso, rectificación, supresión (derecho al olvido), limitación y oposición solicitándolo directamente al establecimiento responsable del programa.
+                  <strong className="text-[#1d1d1f]">{t('signup_privacy_rights')}:</strong> {t('signup_privacy_rights_desc')}
                 </p>
               </div>
             )}
