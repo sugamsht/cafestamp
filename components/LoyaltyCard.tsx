@@ -9,6 +9,8 @@ import { cn, resolveHexAndOpacity, hexToRgba } from '../lib/utils';
 import { translateTransactionTitle, translateTransactionRemarks } from '../lib/locale';
 import { useLanguage } from '../lib/i18n/LanguageContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { useAuth } from './AuthProvider';
+import { buildCampaignSignupUrl, buildStaffScanEntryUrl } from '../lib/links';
 import { QrCode, History, Gift, Plus, X, Minus, CreditCard, Globe } from 'lucide-react';
 import { siFacebook, siInstagram, siTiktok, siX, siYoutube } from 'simple-icons/icons';
 
@@ -60,8 +62,23 @@ export const LoyaltyCard: React.FC<LoyaltyCardProps> = ({
   const [currentSlide, setCurrentSlide] = useState<0 | 1>(0);
   const [historyUnlocked, setHistoryUnlocked] = useState(false);
 
-  const effectiveQr = qrValue || (cardId ? (typeof window !== 'undefined' ? `${window.location.origin}/scan/${encodeURIComponent(cardId)}` : cardId) : '');
-  const previewQrValue = typeof window !== 'undefined' ? `${window.location.origin}` : 'https://stampee.app';
+  const { currentOwner } = useAuth();
+  const activeSlug = currentOwner?.slug || (() => {
+    if (typeof window !== 'undefined') {
+      const segment = window.location.pathname.split('/').filter(Boolean)[0];
+      if (segment && !['cards', 'campaigns', 'editor', 'preview', 'active', 'login', 'issued-cards', 'settings', 'analytics', 'customers'].includes(segment)) {
+        return segment;
+      }
+    }
+    return 'demo';
+  })();
+
+  const effectiveQr = (() => {
+    if (qrValue) return qrValue;
+    if (cardId) return buildStaffScanEntryUrl(activeSlug, cardId);
+    if (template?.id) return buildCampaignSignupUrl(activeSlug, template.id);
+    return typeof window !== 'undefined' ? `${window.location.origin}/${activeSlug}` : '';
+  })();
   
   // Refs for scroll handling
   const lastScrollTime = useRef<number>(0);
@@ -585,7 +602,7 @@ export const LoyaltyCard: React.FC<LoyaltyCardProps> = ({
                 )}>
                     <div className="relative p-2 rounded-xl border-2 border-gray-100 bg-white">
                         <QrCodeDisplay 
-                          value={effectiveQr || previewQrValue} 
+                          value={effectiveQr} 
                           label={t('card_qr_code')} 
                           className="h-[220px] w-[220px] rounded-lg" 
                         />
@@ -604,10 +621,15 @@ export const LoyaltyCard: React.FC<LoyaltyCardProps> = ({
                         )}
                       </div>
                     ) : (
-                      <div className="text-center">
-                        <span className="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider bg-gray-100 text-gray-500">
-                          {language === 'es' ? 'Vista previa' : 'Preview'}
+                      <div className="text-center space-y-1.5 max-w-[240px]">
+                        <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          {language === 'es' ? 'Escanea para unirte' : 'Scan to join'}
                         </span>
+                        <p className="text-xs text-muted-foreground">
+                          {language === 'es' 
+                            ? 'Los clientes escanean este código para registrarse y obtener su tarjeta.' 
+                            : 'Customers scan this code to register and get their card.'}
+                        </p>
                       </div>
                     )}
                 </div>

@@ -12,6 +12,7 @@ import { ArrowLeft, Check as CheckIcon, Smartphone, Image as ImageIcon, Type, Pa
 import { useNavigate } from 'react-router-dom';
 import { ICON_OPTIONS } from '../lib/iconRegistry';
 import { useAuth } from './AuthProvider';
+import { buildCampaignSignupUrl } from '../lib/links';
 import { deleteCampaignAssetByUrl, type CampaignAssetKind, uploadCampaignAsset } from '../lib/storage/campaignAssets';
 
 interface CardEditorProps {
@@ -356,6 +357,7 @@ export const CardEditor: React.FC<CardEditorProps> = ({ initialTemplate, onSave 
   const navigate = useNavigate();
   const { currentOwner } = useAuth();
   const [template, setTemplate] = useState<Template>(initialTemplate);
+  const signupQrUrl = currentOwner?.slug ? buildCampaignSignupUrl(currentOwner.slug, template.id) : undefined;
   const [saveBusy, setSaveBusy] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -624,6 +626,7 @@ export const CardEditor: React.FC<CardEditorProps> = ({ initialTemplate, onSave 
               template={template}
               mode="preview"
               sizeVariant="default"
+              qrValue={signupQrUrl}
               className="h-full w-full"
             />
           </div>
@@ -1180,6 +1183,7 @@ export const CardEditor: React.FC<CardEditorProps> = ({ initialTemplate, onSave 
                 template={template}
                 mode="preview"
                 sizeVariant="compact"
+                qrValue={signupQrUrl}
                 className="h-full w-full"
               />
             </div>

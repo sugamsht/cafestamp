@@ -15,7 +15,7 @@ import { VerifyBanner } from './components/VerifyBanner';
 import { fetchCampaigns, upsertCampaign, deleteCampaign as dbDeleteCampaign, setCampaignEnabled } from './lib/db/campaigns';
 import { fetchCustomersWithCards } from './lib/db/customers';
 import { fetchPublicScanEntryContext } from './lib/db/issuedCards';
-import { buildIssuedCardsKioskUrl, buildStaffPortalUrl, buildStaffScanEntryUrl } from './lib/links';
+import { buildCampaignSignupUrl, buildIssuedCardsKioskUrl, buildStaffPortalUrl, buildStaffScanEntryUrl } from './lib/links';
 import { isSupabaseConfigured, supabase } from './lib/supabase';
 import { useSubscription } from './lib/useSubscription';
 import { SubscriptionProvider } from './components/SubscriptionContext';
@@ -402,9 +402,12 @@ const StaffScanEntryWrapper: React.FC = () => {
 const ActiveCardWrapper: React.FC<{ templates: Template[] }> = ({ templates }) => {
   const { cardId } = useParams<{ cardId: string }>();
   const navigate = useNavigate();
+  const { currentOwner } = useAuth();
   const template = templates.find(t => t.id === cardId);
 
   if (!template) return <Navigate to="/campaigns" />;
+
+  const signupQrUrl = currentOwner?.slug ? buildCampaignSignupUrl(currentOwner.slug, template.id) : undefined;
 
   return (
     <div className="h-screen w-full bg-background relative flex flex-col items-center justify-center animate-fade-in">
@@ -419,6 +422,7 @@ const ActiveCardWrapper: React.FC<{ templates: Template[] }> = ({ templates }) =
         <LoyaltyCard
           template={template}
           mode="active"
+          qrValue={signupQrUrl}
           className="h-full w-full"
         />
       )}
@@ -429,9 +433,12 @@ const ActiveCardWrapper: React.FC<{ templates: Template[] }> = ({ templates }) =
 const PreviewWrapper: React.FC = () => {
   const { templateId } = useParams<{ templateId: string }>();
   const navigate = useNavigate();
+  const { currentOwner } = useAuth();
   const template = templates.find(t => t.id === templateId);
 
   if (!template) return <Navigate to="/gallery" />;
+
+  const signupQrUrl = currentOwner?.slug ? buildCampaignSignupUrl(currentOwner.slug, template.id) : undefined;
 
   return (
     <div className="h-screen w-full">
@@ -439,6 +446,7 @@ const PreviewWrapper: React.FC = () => {
         <LoyaltyCard
           template={template}
           mode="preview"
+          qrValue={signupQrUrl}
           onBack={() => navigate('/gallery')}
           onCreate={() => navigate(`/editor/new?templateId=${templateId}`)}
           className="h-full w-full"
