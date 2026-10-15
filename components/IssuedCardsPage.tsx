@@ -68,15 +68,16 @@ export const IssuedCardsPage: React.FC<IssuedCardsPageProps> = ({ customers, cam
     return null;
   }, [campaigns, customers]);
 
-  const handleAwardStamp = async (bypassCooldown = false, remarks?: string) => {
+  const handleAwardStamp = async (bypassCooldown: boolean | unknown = false, remarks?: string) => {
     if (!activeKioskData) {
       return { ok: false, error: 'No active card selected.' } as const;
     }
+    const shouldBypass = typeof bypassCooldown === 'boolean' ? bypassCooldown : false;
     setMutationBusy(true);
     setMutationError("");
     const uniqueId = activeKioskData.card.uniqueId;
     try {
-      const result = await awardCustomerStamp(uniqueId, { remarks, bypassCooldown });
+      const result = await awardCustomerStamp(uniqueId, { remarks, bypassCooldown: shouldBypass });
       if (!result.ok) {
         return result;
       }
@@ -90,7 +91,7 @@ export const IssuedCardsPage: React.FC<IssuedCardsPageProps> = ({ customers, cam
               stamps: result.stamps,
               lastVisit: result.lastVisit,
               status: result.status,
-              history: [result.transaction, ...card.history],
+              history: [result.transaction, ...(card.history || [])],
             };
           }
           return card;
@@ -106,7 +107,7 @@ export const IssuedCardsPage: React.FC<IssuedCardsPageProps> = ({ customers, cam
             stamps: result.stamps,
             lastVisit: result.lastVisit,
             status: result.status,
-            history: [result.transaction, ...prev.card.history],
+            history: [result.transaction, ...(prev.card.history || [])],
           }
         };
       });
@@ -139,7 +140,7 @@ export const IssuedCardsPage: React.FC<IssuedCardsPageProps> = ({ customers, cam
               stamps: result.stamps,
               lastVisit: result.lastVisit,
               status: result.status,
-              history: [result.transaction, ...card.history],
+              history: [result.transaction, ...(card.history || [])],
             };
           }
           return card;
@@ -155,7 +156,7 @@ export const IssuedCardsPage: React.FC<IssuedCardsPageProps> = ({ customers, cam
             stamps: result.stamps,
             lastVisit: result.lastVisit,
             status: result.status,
-            history: [result.transaction, ...prev.card.history],
+            history: [result.transaction, ...(prev.card.history || [])],
           }
         };
       });
@@ -187,7 +188,7 @@ export const IssuedCardsPage: React.FC<IssuedCardsPageProps> = ({ customers, cam
               ...card,
               status: 'Redeemed',
               completedDate: result.completedDate,
-              history: [result.transaction, ...card.history],
+              history: [result.transaction, ...(card.history || [])],
             };
           }
           return card;
@@ -202,7 +203,7 @@ export const IssuedCardsPage: React.FC<IssuedCardsPageProps> = ({ customers, cam
             ...prev.card,
             status: 'Redeemed',
             completedDate: result.completedDate,
-            history: [result.transaction, ...prev.card.history],
+            history: [result.transaction, ...(prev.card.history || [])],
           }
         };
       });

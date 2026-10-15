@@ -141,29 +141,32 @@ export const KioskMode: React.FC<KioskModeProps> = ({
 
   // --- Handlers ---
 
-  const handleConfirmAction = async (bypassCooldown = false) => {
+  const handleConfirmAction = async (bypassCooldown: boolean | unknown = false) => {
       setActionError("");
+      const shouldBypass = typeof bypassCooldown === 'boolean' ? bypassCooldown : false;
       try {
           if (confirmAction === 'stamp') {
-              await performAddStamp(bypassCooldown);
+              await performAddStamp(shouldBypass);
           } else if (confirmAction === 'remove') {
               await performRemoveStamp();
           } else if (confirmAction === 'redeem') {
               await performRedeem();
           }
-      } catch {
-          setActionError("Unable to update this card right now. Please try again.");
+      } catch (err) {
+          console.error("Error confirming action in KioskMode:", err);
+          setActionError(err instanceof Error ? err.message : "Unable to update this card right now. Please try again.");
       }
   };
 
-  const performAddStamp = async (bypassCooldown = false) => {
+  const performAddStamp = async (bypassCooldown: boolean | unknown = false) => {
+      const shouldBypass = typeof bypassCooldown === 'boolean' ? bypassCooldown : false;
       setIsAnimating(true);
       setActionError("");
       setCooldownRemaining(null);
 
       try {
           if (onAwardStamp) {
-              const result = await onAwardStamp(bypassCooldown);
+              const result = await onAwardStamp(shouldBypass);
               if (!result.ok) {
                   if (result.code === 'COOLDOWN_ACTIVE' && result.remainingSeconds) {
                       setCooldownRemaining(result.remainingSeconds);
@@ -182,7 +185,7 @@ export const KioskMode: React.FC<KioskModeProps> = ({
               await onUpdateCard(customer.id, card.id, {
                   stamps: card.stamps + 1,
                   lastVisit: new Date().toISOString().split('T')[0],
-                  history: [tx, ...card.history]
+                  history: [tx, ...(card.history || [])]
               });
               setConfirmAction(null);
           }
@@ -207,7 +210,7 @@ export const KioskMode: React.FC<KioskModeProps> = ({
           const tx = createTransaction('stamp_remove', -1, 'Stamp Removed', 'Manual Correction', { id: actorId, name: actorName, role: actorRole });
           await onUpdateCard(customer.id, card.id, {
               stamps: Math.max(0, card.stamps - 1),
-              history: [tx, ...card.history]
+              history: [tx, ...(card.history || [])]
           });
           setConfirmAction(null);
       }
@@ -231,7 +234,7 @@ export const KioskMode: React.FC<KioskModeProps> = ({
           await onUpdateCard(customer.id, card.id, {
               status: 'Redeemed',
               completedDate: new Date().toISOString().split('T')[0],
-              history: [tx, ...card.history]
+              history: [tx, ...(card.history || [])]
           });
           setConfirmAction(null);
           setRedemptionRemarks("");
@@ -690,11 +693,11 @@ export const KioskMode: React.FC<KioskModeProps> = ({
                 <Button variant="outline" className="rounded-full border-black/10" onClick={() => setConfirmAction(null)} disabled={mutationBusy}>{t('cancel')}</Button>
                 
                 {confirmAction === 'remove' ? (
-                    <Button variant="destructive" className="rounded-full" onClick={handleConfirmAction} disabled={mutationBusy}>
+                    <Button variant="destructive" className="rounded-full" onClick={() => handleConfirmAction(false)} disabled={mutationBusy}>
                         {mutationBusy ? t('saving') : confirmCopy?.buttonLabel}
                     </Button>
                 ) : (
-                    <Button className={cn("rounded-full", confirmCopy?.buttonClassName)} onClick={handleConfirmAction} disabled={mutationBusy}>
+                    <Button className={cn("rounded-full", confirmCopy?.buttonClassName)} onClick={() => handleConfirmAction(false)} disabled={mutationBusy}>
                         {mutationBusy ? t('saving') : confirmCopy?.buttonLabel}
                     </Button>
                 )}

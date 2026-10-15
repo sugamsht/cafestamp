@@ -83,8 +83,8 @@ export async function awardCustomerStamp(
   const { data, error } = await supabase.rpc('award_customer_stamp', {
     p_card_unique_id: cardUniqueId,
     p_remarks: options?.remarks ?? null,
-    p_bypass_cooldown: options?.bypassCooldown ?? false,
-    p_cooldown_seconds: options?.cooldownSeconds ?? 300,
+    p_bypass_cooldown: Boolean(options?.bypassCooldown),
+    p_cooldown_seconds: typeof options?.cooldownSeconds === 'number' ? options.cooldownSeconds : 300,
   });
 
   if (error) {
