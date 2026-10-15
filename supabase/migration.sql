@@ -618,7 +618,7 @@ begin
   ) values (
     new_uid,
     new_uid,
-    jsonb_build_object('sub', new_uid::text, 'email', lower(trim(staff_email))),
+    jsonb_build_object('sub', new_uid::text, 'email', lower(trim(staff_email)), 'email_verified', true, 'role', 'staff', 'owner_id', owner_uid::text, 'business_name', staff_name),
     'email',
     new_uid::text,
     now(),
@@ -629,7 +629,7 @@ begin
   return new_uid;
 end;
 $$ language plpgsql security definer
-set search_path = public;
+set search_path = public, auth, extensions;
 
 
 -- 10. UPDATE STAFF PIN (RPC)
@@ -643,13 +643,17 @@ begin
     raise exception 'Not your staff member';
   end if;
 
+  if length(new_pin) < 4 or length(new_pin) > 6 then
+    raise exception 'PIN must be 4-6 digits';
+  end if;
+
   update auth.users
   set encrypted_password = crypt(new_pin, gen_salt('bf')),
       updated_at = now()
   where id = staff_id;
 end;
 $$ language plpgsql security definer
-set search_path = public;
+set search_path = public, auth, extensions;
 
 
 -- 11. DELETE STAFF ACCOUNT (RPC)
@@ -667,7 +671,7 @@ begin
   where id = staff_id;
 end;
 $$ language plpgsql security definer
-set search_path = public;
+set search_path = public, auth, extensions;
 
 
 -- 12. DELETE OWN ACCOUNT (RPC)

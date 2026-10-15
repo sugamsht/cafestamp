@@ -3,13 +3,13 @@
 -- New projects should use migration.sql instead.
 
 alter function public.create_staff_account(text, text, text)
-set search_path = public;
+set search_path = public, auth, extensions;
 
 alter function public.update_staff_pin(uuid, text)
-set search_path = public;
+set search_path = public, auth, extensions;
 
 alter function public.delete_own_account()
-set search_path = public;
+set search_path = public, auth, extensions;
 
 alter function public.delete_staff_account(uuid)
-set search_path = public;
+set search_path = public, auth, extensions;

@@ -408,7 +408,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       staff_name: payload.name.trim(),
     });
 
-    if (error) return { ok: false, error: STAFF_ACTION_ERROR };
+    if (error) {
+      console.error("Failed to create staff account:", error);
+      return { ok: false, error: error.message || STAFF_ACTION_ERROR };
+    }
     setStaffAccounts(await fetchStaffAccounts(currentOwner.id));
     return { ok: true };
   }, [currentOwner, currentUser, staffAccounts]);
@@ -427,7 +430,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       staff_id: staffId,
       new_pin: pin,
     });
-    if (error) return { ok: false, error: STAFF_ACTION_ERROR };
+    if (error) {
+      console.error("Failed to update staff pin:", error);
+      return { ok: false, error: error.message || STAFF_ACTION_ERROR };
+    }
     return { ok: true };
   }, [currentOwner, currentUser]);
 
@@ -456,7 +462,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { error } = await supabase.rpc("delete_staff_account", {
       staff_id: staffId,
     });
-    if (error) return { ok: false, error: STAFF_ACTION_ERROR };
+    if (error) {
+      console.error("Failed to delete staff account:", error);
+      return { ok: false, error: error.message || STAFF_ACTION_ERROR };
+    }
     setStaffAccounts(await fetchStaffAccounts(currentOwner.id));
     return { ok: true };
   }, [currentOwner, currentUser]);
