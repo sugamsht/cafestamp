@@ -268,6 +268,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
       }
 
+      if (profile.access === "disabled") {
+        await supabase.auth.signOut();
+        return {
+          ok: false,
+          error: "This account is disabled. Ask the owner to re-enable it.",
+        };
+      }
+
       await loadFullSession(data.user.id, data.user);
       return { ok: true, user: profile };
     } catch {

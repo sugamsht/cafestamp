@@ -596,7 +596,10 @@ begin
   insert into auth.users (
     id, instance_id, aud, role, email, encrypted_password,
     email_confirmed_at, raw_user_meta_data, raw_app_meta_data,
-    created_at, updated_at, is_sso_user
+    created_at, updated_at, is_sso_user,
+    confirmation_token, recovery_token, email_change_token_new,
+    email_change, email_change_token_current, reauthentication_token,
+    phone_change, phone_change_token
   ) values (
     new_uid,
     '00000000-0000-0000-0000-000000000000',
@@ -609,7 +612,8 @@ begin
     jsonb_build_object('provider', 'email', 'providers', array_to_json(array['email'])),
     now(),
     now(),
-    false
+    false,
+    '', '', '', '', '', '', '', ''
   );
 
   insert into auth.identities (
