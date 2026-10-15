@@ -1,5 +1,18 @@
 import React, { Suspense, lazy, useCallback, useEffect, useState } from 'react';
-import { Analytics } from '@vercel/analytics/react';
+const VercelAnalytics = lazy(() =>
+  import('@vercel/analytics/react')
+    .then((m) => ({ default: m.Analytics }))
+    .catch(() => ({ default: () => null }))
+);
+
+const SafeAnalytics: React.FC = () => {
+  if (import.meta.env.DEV) return null;
+  return (
+    <Suspense fallback={null}>
+      <VercelAnalytics />
+    </Suspense>
+  );
+};
 import { Sidebar, NAV_ITEMS, SidebarContent } from './components/Sidebar';
 import { Template, Customer, IssuedCard } from './types';
 import { templates } from './data/templates';
@@ -719,7 +732,7 @@ const App: React.FC = () => {
       <AuthProvider>
         <BrowserRouter>
           <SeoManager />
-          <Analytics />
+          <SafeAnalytics />
           <AppRoutes />
         </BrowserRouter>
       </AuthProvider>
