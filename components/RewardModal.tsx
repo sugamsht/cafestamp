@@ -6,21 +6,12 @@ import { resolveHexAndOpacity, hexToRgba } from '../lib/utils';
 const LottiePlayer = lazy(() => import('lottie-react'));
 
 const COMPLETION_MESSAGES = [
-  "You've got this loyalty thing down to a science. Enjoy your genius-level reward!",
-  "You came, you saw, you conquered. Claim your prize, champ!",
-  "You're one sharp tack! Thanks for sticking with us-enjoy your treat.",
-  "Precision pays off. You've successfully navigated your way to a free reward. Well played.",
-  "Efficiency at its finest. You've maximized your stamps-now it's time to collect the dividend.",
-  "You've officially figured out the secret to winning. Your reward is ready and waiting.",
-  "You make this look easy. Your loyalty card is full and your reward is unlocked. Stay sharp.",
-  "Sharp choice. Enjoy your well-earned treat.",
-  "System hacked. You've unlocked the freebie level!",
-  "Straight A's in loyalty. Class is dismissed-enjoy your reward!",
-  "Flawless strategy. Your reward is officially in play.",
-  "Stamps full. Logic wins. Enjoy!",
-  "You've got the system down. Reward ready!",
-  "Expertly earned. Here's your reward.",
-  "Savvy shopper, sweet reward. It's yours!",
+  "¡Felicidades! Has completado tu tarjeta de sellos. ¡Disfruta de tu consumición bien merecida!",
+  "¡Eres un cliente estrella! Gracias por acompañarnos cada día. Tu premio te espera.",
+  "¡Meta conseguida! Canjea tu invitación la próxima vez que pidas en barra.",
+  "La fidelidad tiene premio. Ya tienes disponible tu consumición de la casa.",
+  "¡Tarjeta llena! Disfruta de tu recompensa cortesía de la cafetería.",
+  "Gracias por tu visita constante. ¡Tu premio está listo para saborear!",
 ];
 
 interface RewardModalProps {
@@ -162,12 +153,12 @@ export const RewardModal: React.FC<RewardModalProps> = ({ isOpen, onClose, loadi
           </div>
           
           <h2 className="text-2xl font-bold">
-            {loading ? "Preparing Reward..." : "Card Completed!"}
+            {loading ? "Preparando recompensa..." : "¡Tarjeta Completada!"}
           </h2>
 
           {loading ? (
              <p className="opacity-70" style={{ color: hexToRgba(mutedColor.hex, mutedColor.opacity) }}>
-               Preparing your reward...
+               Preparando tu recompensa...
              </p>
           ) : (
             <>
@@ -178,7 +169,7 @@ export const RewardModal: React.FC<RewardModalProps> = ({ isOpen, onClose, loadi
                 style={{ backgroundColor: panelBg.hex, borderColor: borderColor.hex }}
               >
                 <p className="text-xs uppercase tracking-wider mb-1 opacity-70" style={{ color: hexToRgba(mutedColor.hex, mutedColor.opacity) }}>
-                  Claim Your Reward
+                  Tu Recompensa
                 </p>
                 <p className="text-2xl font-mono font-bold tracking-widest">
                   {rewardName}
@@ -186,7 +177,7 @@ export const RewardModal: React.FC<RewardModalProps> = ({ isOpen, onClose, loadi
               </div>
 
               <p className="text-xs mt-1 opacity-50" style={{ color: hexToRgba(mutedColor.hex, mutedColor.opacity) }}>
-                Show this card to the staff of "{businessName}".
+                Muestra esta pantalla al personal de "{businessName}".
               </p>
             </>
           )}

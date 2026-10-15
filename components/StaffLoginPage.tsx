@@ -61,7 +61,7 @@ export const StaffLoginPage: React.FC = () => {
       }
       navigate(kioskId ? buildIssuedCardsKioskUrl(kioskId) : "/issued-cards");
     } catch {
-      setError("Unable to log in right now. Please try again.");
+      setError("No se pudo iniciar sesión en este momento. Inténtalo de nuevo.");
     } finally {
       setBusy(false);
     }
@@ -71,28 +71,28 @@ export const StaffLoginPage: React.FC = () => {
 
   return (
     <AuthSplitLayout
-      title="Staff portal"
-      subtitle="Log in with your email, PIN, and Org ID to issue cards, scan kiosk traffic, and keep the line moving."
-      badge="Team access"
+      title="Portal de Personal"
+      subtitle="Accede con tu correo, PIN y el ID de cafetería para sellar consumiciones y agilizar la atención en barra."
+      badge="Acceso equipo"
       mode="staff"
     >
       <form className="space-y-5" onSubmit={handleSubmit}>
         <p className="text-sm leading-6 text-[#6d6658]">
-          Staff credentials remain separate from owner login and stay tied to the correct business Org ID.
+          Las credenciales de personal son independientes del acceso del propietario y quedan vinculadas al negocio.
         </p>
 
         {kioskId && (
           <div className="rounded-[1.35rem] border border-black/[0.08] bg-[#fbf3e6] px-4 py-4 text-sm text-[#6a5845]">
-            Kiosk session detected. After login you will be sent straight into the scan flow for this device.
+            Sesión de quiosco detectada. Tras iniciar sesión entrarás directamente al flujo de escáner en este dispositivo.
           </div>
         )}
 
         <div className="space-y-1.5">
-          <label className={labelCls}>Email</label>
+          <label className={labelCls}>Correo Electrónico</label>
           <Input
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            placeholder="you@brand.com"
+            placeholder="camarero@cafeteria.es"
             className={inputCls}
             type="email"
             autoComplete="email"
@@ -101,11 +101,11 @@ export const StaffLoginPage: React.FC = () => {
         </div>
 
         <div className="space-y-1.5">
-          <label className={labelCls}>PIN</label>
+          <label className={labelCls}>PIN de Acceso</label>
           <Input
             value={pin}
             onChange={(event) => setPin(event.target.value)}
-            placeholder="4-6 digits"
+            placeholder="4-6 dígitos"
             className={inputCls}
             type="password"
             inputMode="numeric"
@@ -115,19 +115,19 @@ export const StaffLoginPage: React.FC = () => {
         </div>
 
         <div className="space-y-1.5">
-          <label className={labelCls}>Org ID</label>
+          <label className={labelCls}>ID de Cafetería (Org ID)</label>
           <Input
             value={orgId}
             onChange={(event) => setOrgId(event.target.value)}
-            placeholder="owner business ID"
+            placeholder="ID del negocio"
             className={`${inputCls} font-mono`}
             required
             disabled={hasPrefilledOrgId}
           />
           <p className="text-xs leading-6 text-[#6d6658]">
             {hasPrefilledOrgId
-              ? "This Org ID was pre-filled from your staff portal link."
-              : "Ask your owner for the Org ID from Settings if you do not already have the portal link."}
+              ? "Este ID de Cafetería se ha completado automáticamente desde tu enlace de personal."
+              : "Solicita el ID de Cafetería al responsable si no dispones del enlace directo."}
           </p>
         </div>
 
@@ -142,14 +142,14 @@ export const StaffLoginPage: React.FC = () => {
           className="h-14 w-full rounded-[1.2rem] bg-[#1b1813] text-base font-semibold text-white shadow-none hover:bg-[#11100d]"
           disabled={busy}
         >
-          {busy ? "Logging in..." : "Log in as Staff"}
+          {busy ? "Iniciando sesión..." : "Entrar como Personal"}
           {!busy && <ArrowRight className="ml-2 h-4 w-4" />}
         </Button>
 
         <div className="rounded-[1.35rem] border border-black/[0.08] bg-[#f5f1e8] px-4 py-4 text-sm text-[#6d6658]">
-          Owner login?{" "}
+          ¿Acceso de propietario?{" "}
           <Link to="/login" className="font-semibold text-[#171512] underline-offset-2 hover:underline">
-            Go to main login
+            Ir al acceso principal
           </Link>
         </div>
       </form>

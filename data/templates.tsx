@@ -3,6 +3,33 @@ import { ICON_REGISTRY } from '../lib/iconRegistry';
 
 export const templates: Template[] = [
   {
+    id: 'cafe-artesano',
+    name: 'Café de Especialidad',
+    description: 'Tarjeta de fidelización para cafeterías y tostadores de café en España.',
+    tagline: 'Disfruta de 8 consumiciones y la siguiente corre por nuestra cuenta',
+    rewardName: 'Café o Desayuno Gratis',
+    backgroundOpacity: 100,
+    social: {
+      instagram: '@cafedeespecialidad',
+      website: 'https://ejemplo.es'
+    },
+    icon: ICON_REGISTRY.coffee,
+    totalStamps: 8,
+    colors: {
+      background: '#231815',
+      cardBackground: '#30221e',
+      text: '#fdfbf7',
+      muted: '#c4b5a5',
+      stampActive: '#d4a373',
+      stampInactive: '#45322b',
+      iconActive: '#231815',
+      iconInactive: '#8c7667',
+      button: '#d4a373',
+      buttonText: '#231815',
+      border: '#533e36'
+    }
+  },
+  {
     id: 'cookie-classic',
     name: 'Cookie Classic',
     description: 'The original warm and cozy cookie loyalty card.',

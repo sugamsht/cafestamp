@@ -6,6 +6,7 @@ import { QrCodeDisplay } from './ui/qr-code-display';
 import { generateReward } from '../services/rewardService';
 import { Template, Transaction } from '../types';
 import { cn, resolveHexAndOpacity, hexToRgba } from '../lib/utils';
+import { translateTransactionTitle, translateTransactionRemarks } from '../lib/locale';
 import { QrCode, History, Gift, Plus, X, Minus, CreditCard, Globe } from 'lucide-react';
 import { siFacebook, siInstagram, siTiktok, siX, siYoutube } from 'simple-icons/icons';
 
@@ -444,7 +445,7 @@ export const LoyaltyCard: React.FC<LoyaltyCardProps> = ({
                       )}
                       style={{ color: hexToRgba(mutedColor.hex, mutedColor.opacity) }}
                     >
-                    {template.tagline ? template.tagline : `Collect ${totalStamps} stamps for a ${rewardName}`}
+                    {template.tagline ? template.tagline : `Consigue ${totalStamps} sellos para: ${rewardName}`}
                     </p>
                 )}
               </div>
@@ -492,10 +493,10 @@ export const LoyaltyCard: React.FC<LoyaltyCardProps> = ({
               {isCompleted && !isRedeemed && shouldShowRewardModal ? (
                  <div className="mt-3 flex flex-col items-center text-center">
                    <h3 className={cn("text-lg md:text-2xl font-bold text-gray-900 mt-1", isMobileCompleted && "text-base")}>
-                     🎉 Congratulations! 🎉
+                     🎉 ¡Enhorabuena! 🎉
                    </h3>
                    <p className={cn("text-base md:text-lg text-gray-600 leading-snug", isMobileCompleted && "text-sm")}>
-                      Your next <strong>{rewardName}</strong> is free! Please show this to the staff.
+                      ¡Tu próximo <strong>{rewardName}</strong> es gratis! Muestra esta tarjeta al personal de la cafetería.
                    </p>
                  </div>
               ) : (
@@ -506,7 +507,7 @@ export const LoyaltyCard: React.FC<LoyaltyCardProps> = ({
                     )}
                     style={{ color: textColor.hex }}
                   >
-                    <p>Reward: {rewardName}</p>
+                    <p>Recompensa: {rewardName}</p>
                   </div>
               )}
 
@@ -549,7 +550,7 @@ export const LoyaltyCard: React.FC<LoyaltyCardProps> = ({
                        <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
                            <Icon size={16} className="text-gray-900"/>
                        </div>
-                       <span className="font-bold text-sm tracking-wide uppercase text-gray-500">History</span>
+                       <span className="font-bold text-sm tracking-wide uppercase text-gray-500">Historial y QR</span>
                    </div>
                    <button 
                      onClick={() => setCurrentSlide(0)} 
@@ -572,7 +573,7 @@ export const LoyaltyCard: React.FC<LoyaltyCardProps> = ({
                 )}>
                     <div className="relative p-2 rounded-xl border-2 border-gray-100">
                         {qrValue ? (
-                          <QrCodeDisplay value={qrValue} label="Card QR code" className="h-[220px] w-[220px] rounded-lg" />
+                          <QrCodeDisplay value={qrValue} label="Código QR de la tarjeta" className="h-[220px] w-[220px] rounded-lg" />
                         ) : (
                           <>
                             <QrCode size={220} className="text-gray-900" />
@@ -588,12 +589,12 @@ export const LoyaltyCard: React.FC<LoyaltyCardProps> = ({
                       <div className="text-center space-y-1">
                         {customerName && (
                           <div className="text-sm text-gray-700">
-                            Issued to <span className="font-semibold">{customerName}</span>
+                            Emitida a favor de <span className="font-semibold">{customerName}</span>
                           </div>
                         )}
                         {cardId && (
                           <div className="text-xs text-gray-400 font-mono">
-                            Card ID: {cardId}
+                            ID de Tarjeta: {cardId}
                           </div>
                         )}
                       </div>
@@ -607,13 +608,13 @@ export const LoyaltyCard: React.FC<LoyaltyCardProps> = ({
                 )}>
                     <div className="flex items-center gap-2 mb-4">
                         <History size={16} className="text-gray-400" />
-                        <span className="text-xs font-bold uppercase tracking-wider text-gray-400">Activity Log</span>
+                        <span className="text-xs font-bold uppercase tracking-wider text-gray-400">Registro de Actividad</span>
                     </div>
                     
                     <div className="w-full">
                          <div className="w-full p-0 space-y-4">
                             {history.length === 0 ? (
-                                <p className="text-center text-gray-400 text-sm py-4 italic">No activity yet.</p>
+                                <p className="text-center text-gray-400 text-sm py-4 italic">Aún no hay actividad registrada.</p>
                             ) : (
                                 history.map((tx) => {
                                     const TxIcon = getTransactionIcon(tx.type);
@@ -632,10 +633,10 @@ export const LoyaltyCard: React.FC<LoyaltyCardProps> = ({
                                                     <TxIcon size={16} />
                                                 </div>
                                                 <div className="flex flex-col">
-                                                    <span className="text-sm font-semibold text-gray-900">{tx.title}</span>
+                                                    <span className="text-sm font-semibold text-gray-900">{translateTransactionTitle(tx.title)}</span>
                                                     <span className="text-xs text-gray-400">{tx.date}</span>
                                                     {tx.remarks && (
-                                                        <span className="text-xs text-gray-500 mt-1 italic">"{tx.remarks}"</span>
+                                                        <span className="text-xs text-gray-500 mt-1 italic">"{translateTransactionRemarks(tx.remarks)}"</span>
                                                     )}
                                                 </div>
                                             </div>

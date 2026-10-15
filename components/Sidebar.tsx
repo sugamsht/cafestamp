@@ -17,13 +17,13 @@ interface SidebarContentProps {
 }
 
 export const NAV_ITEMS = [
-  { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['owner'] },
-  { path: '/campaigns', label: 'Campaigns', icon: CreditCard, roles: ['owner'] },
-  { path: '/issued-cards', label: 'Issued Cards', icon: Wallet, roles: ['owner', 'staff'] },
-  { path: '/transactions', label: 'Transactions', icon: History, roles: ['owner'] },
-  { path: '/customers', label: 'Customers', icon: Users, roles: ['owner', 'staff'] },
-  { path: '/analytics', label: 'Analytics', icon: Sparkles, roles: ['owner'] },
-  { path: '/settings', label: 'Settings', icon: Settings, roles: ['owner'] },
+  { path: '/dashboard', label: 'Panel', icon: LayoutDashboard, roles: ['owner'] },
+  { path: '/campaigns', label: 'Campañas', icon: CreditCard, roles: ['owner'] },
+  { path: '/issued-cards', label: 'Tarjetas Emitidas', icon: Wallet, roles: ['owner', 'staff'] },
+  { path: '/transactions', label: 'Transacciones', icon: History, roles: ['owner'] },
+  { path: '/customers', label: 'Clientes', icon: Users, roles: ['owner', 'staff'] },
+  { path: '/analytics', label: 'Estadísticas', icon: Sparkles, roles: ['owner'] },
+  { path: '/settings', label: 'Ajustes', icon: Settings, roles: ['owner'] },
 ];
 
 const PlanBadge: React.FC = () => {
@@ -101,7 +101,7 @@ export const SidebarContent: React.FC<SidebarContentProps> = ({ onNavigate, onSc
               }}
             >
               <QrCode size={20} />
-              Scan QR Code
+              Escanear Código QR
             </Button>
           )}
         </div>
@@ -112,7 +112,7 @@ export const SidebarContent: React.FC<SidebarContentProps> = ({ onNavigate, onSc
           <div className="rounded-lg border border-border/80 bg-card px-3 py-3 text-xs text-muted-foreground shadow-subtle">
               <div className="font-semibold text-foreground">{currentUser.businessName}</div>
               <div className="font-mono">@{currentOwner?.slug ?? "staff"}</div>
-              {isStaff && <div className="text-[10px] uppercase tracking-widest mt-1">Staff Access</div>}
+              {isStaff && <div className="text-[10px] uppercase tracking-widest mt-1">Acceso de Personal</div>}
           </div>
          )}
          <Button
@@ -124,7 +124,7 @@ export const SidebarContent: React.FC<SidebarContentProps> = ({ onNavigate, onSc
             }}
          >
             <LogOut size={20} />
-            Log Out
+            Cerrar Sesión
          </Button>
          <div className="px-1 text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
             v0.5
