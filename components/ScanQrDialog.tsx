@@ -183,7 +183,7 @@ export const ScanQrDialog: React.FC<ScanQrDialogProps> = ({ isOpen, onClose, onD
                   value={manualValue}
                   onChange={(event) => setManualValue(event.target.value)}
                   placeholder="Paste full card ID"
-                  className="h-12 border-white/10 bg-black/25 font-mono text-sm text-white placeholder:text-white/35"
+                  className="h-12 border-white/10 bg-black/25 font-mono text-base md:text-sm text-white placeholder:text-white/35"
                 />
                 <Button
                   variant="outline"

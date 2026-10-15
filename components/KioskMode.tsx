@@ -269,8 +269,8 @@ export const KioskMode: React.FC<KioskModeProps> = ({
       </div>
       <div className="relative flex min-h-screen flex-col md:h-full md:min-h-0 md:flex-row">
       {/* LEFT: Card Visual */}
-      <div className="relative flex min-h-screen w-full shrink-0 flex-col border-b border-black/5 bg-[linear-gradient(180deg,#f9f7f0_0%,#efece1_100%)] px-4 pb-6 pt-4 md:h-full md:min-h-0 md:w-1/2 md:border-b-0 md:border-r md:px-6 md:pb-8 md:pt-6 lg:w-5/12">
-        <div className="mb-4 flex items-center justify-between md:mb-6">
+      <div className="relative flex w-full shrink-0 flex-col border-b border-black/5 bg-[linear-gradient(180deg,#f9f7f0_0%,#efece1_100%)] px-4 pb-5 pt-4 md:h-full md:min-h-0 md:w-1/2 md:border-b-0 md:border-r md:px-6 md:pb-8 md:pt-6 lg:w-5/12">
+        <div className="mb-3 flex items-center justify-between md:mb-6">
           <Button
             variant="outline"
             onClick={onClose}
@@ -282,10 +282,10 @@ export const KioskMode: React.FC<KioskModeProps> = ({
           <LanguageSwitcher variant="toggle" />
         </div>
 
-        <div className="flex flex-1 items-start justify-center pt-2 sm:pt-4 md:items-center md:pt-0">
-          <div className="relative mx-auto w-full max-w-[26rem] sm:max-w-[28rem] md:mt-4 md:max-w-[380px]">
+        <div className="flex flex-1 items-start justify-center pt-1 sm:pt-4 md:items-center md:pt-0">
+          <div className="relative mx-auto w-full max-w-[22rem] sm:max-w-[28rem] md:mt-4 md:max-w-[380px]">
             <div className="absolute inset-x-8 bottom-[-1.25rem] h-16 rounded-full bg-black/10 blur-2xl" />
-            <div className="relative aspect-[340/600] overflow-hidden rounded-[2.6rem] bg-white shadow-[0_32px_80px_-36px_rgba(0,0,0,0.42)] ring-1 ring-black/5 md:aspect-[420/780]">
+            <div className="relative aspect-[340/580] max-h-[440px] sm:max-h-none overflow-hidden rounded-[2.2rem] sm:rounded-[2.6rem] bg-white shadow-[0_32px_80px_-36px_rgba(0,0,0,0.42)] ring-1 ring-black/5 md:aspect-[420/780]">
                 <LoyaltyCard 
                     template={template}
                     mode="active"
@@ -431,20 +431,20 @@ export const KioskMode: React.FC<KioskModeProps> = ({
                         onClick={() => setConfirmAction('stamp')}
                         disabled={mutationBusy || !canAdd}
                         className={cn(
-                            "group relative overflow-hidden rounded-[30px] border p-6 text-left transition-all duration-200",
+                            "group relative overflow-hidden rounded-[24px] sm:rounded-[30px] border p-5 sm:p-6 text-left transition-all duration-200",
                             !canAdd 
                                 ? "cursor-not-allowed border-black/5 bg-[#f3f2ec] opacity-55" 
-                                : "border-black/5 bg-[linear-gradient(145deg,#1d1d1f_0%,#303033_100%)] text-white shadow-[0_28px_65px_-34px_rgba(0,0,0,0.55)] hover:-translate-y-0.5"
+                                : "border-black/5 bg-[linear-gradient(145deg,#1d1d1f_0%,#303033_100%)] text-white shadow-[0_28px_65px_-34px_rgba(0,0,0,0.55)] hover:-translate-y-0.5 active:scale-[0.98]"
                         )}
                     >
                         <div className="absolute right-[-1.5rem] top-[-1.5rem] h-24 w-24 rounded-full bg-white/10 blur-2xl" />
-                        <div className="relative flex min-h-[220px] flex-col justify-between gap-6">
+                        <div className="relative flex min-h-[160px] sm:min-h-[220px] flex-col justify-between gap-4 sm:gap-6">
                           <div className="flex items-start justify-between gap-3">
                             <div className={cn(
-                              "flex h-14 w-14 items-center justify-center rounded-2xl",
+                              "flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl",
                               !canAdd ? "bg-white/60 text-[#6e6e73]" : "bg-white/15 text-white"
                             )}>
-                              <Plus size={28} strokeWidth={2.8} />
+                              <Plus size={26} strokeWidth={2.8} />
                             </div>
                             <span className={cn(
                               "rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em]",
@@ -454,10 +454,10 @@ export const KioskMode: React.FC<KioskModeProps> = ({
                             </span>
                           </div>
                           <div>
-                            <span className={cn("block text-2xl font-bold tracking-tight", !canAdd && "text-[#4c4c52]")}>{t('kiosk_add_stamp')}</span>
-                            <span className={cn("mt-2 block text-sm leading-6", !canAdd ? "text-[#6e6e73]" : "text-white/78")}>{t('kiosk_add_stamp_sub')}</span>
+                            <span className={cn("block text-xl sm:text-2xl font-bold tracking-tight", !canAdd && "text-[#4c4c52]")}>{t('kiosk_add_stamp')}</span>
+                            <span className={cn("mt-1.5 block text-xs sm:text-sm leading-5 sm:leading-6", !canAdd ? "text-[#6e6e73]" : "text-white/78")}>{t('kiosk_add_stamp_sub')}</span>
                           </div>
-                          <div className={cn("text-sm font-medium", !canAdd ? "text-[#6e6e73]" : "text-white/84")}>
+                          <div className={cn("text-xs sm:text-sm font-medium", !canAdd ? "text-[#6e6e73]" : "text-white/84")}>
                             {canAdd ? t('kiosk_more_until', { n: remainingStamps }) : t('kiosk_max_reached')}
                           </div>
                         </div>
@@ -469,20 +469,20 @@ export const KioskMode: React.FC<KioskModeProps> = ({
                             onClick={() => setConfirmAction('redeem')}
                             disabled={mutationBusy || !canRedeem}
                             className={cn(
-                                "group relative overflow-hidden rounded-[30px] border p-6 text-left transition-all duration-200",
+                                "group relative overflow-hidden rounded-[24px] sm:rounded-[30px] border p-5 sm:p-6 text-left transition-all duration-200",
                                 !canRedeem 
                                     ? "cursor-not-allowed border-black/5 bg-[#f8f7f2] opacity-60" 
-                                    : "border-[#f0c48e] bg-[linear-gradient(145deg,#fff6e8_0%,#ffe8c5_100%)] shadow-[0_28px_60px_-38px_rgba(207,109,27,0.45)] hover:-translate-y-0.5"
+                                    : "border-[#f0c48e] bg-[linear-gradient(145deg,#fff6e8_0%,#ffe8c5_100%)] shadow-[0_28px_60px_-38px_rgba(207,109,27,0.45)] hover:-translate-y-0.5 active:scale-[0.98]"
                             )}
                         >
                             <div className="absolute bottom-[-2rem] right-[-2rem] h-28 w-28 rounded-full bg-white/30 blur-2xl" />
-                            <div className="relative flex min-h-[220px] flex-col justify-between gap-6">
+                            <div className="relative flex min-h-[160px] sm:min-h-[220px] flex-col justify-between gap-4 sm:gap-6">
                               <div className="flex items-start justify-between gap-3">
                                 <div className={cn(
-                                  "flex h-14 w-14 items-center justify-center rounded-2xl",
+                                  "flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl",
                                   canRedeem ? "bg-[#cf6d1b] text-white" : "bg-white text-[#a8a29e]"
                                 )}>
-                                  <Gift size={28} strokeWidth={2.6} />
+                                  <Gift size={26} strokeWidth={2.6} />
                                 </div>
                                 <span className={cn(
                                   "rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em]",
@@ -492,10 +492,10 @@ export const KioskMode: React.FC<KioskModeProps> = ({
                                 </span>
                               </div>
                               <div>
-                                <span className={cn("block text-2xl font-bold tracking-tight", canRedeem ? "text-[#8a4a11]" : "text-[#4c4c52]")}>{t('kiosk_redeem_reward')}</span>
-                                <span className="mt-2 block text-sm leading-6 text-[#6b5b49]">{t('kiosk_redeem_reward_sub')}</span>
+                                <span className={cn("block text-xl sm:text-2xl font-bold tracking-tight", canRedeem ? "text-[#8a4a11]" : "text-[#4c4c52]")}>{t('kiosk_redeem_reward')}</span>
+                                <span className="mt-1.5 block text-xs sm:text-sm leading-5 sm:leading-6 text-[#6b5b49]">{t('kiosk_redeem_reward_sub')}</span>
                               </div>
-                              <div className={cn("text-sm font-medium", canRedeem ? "text-[#8a4a11]" : "text-[#6e6e73]")}>
+                              <div className={cn("text-xs sm:text-sm font-medium", canRedeem ? "text-[#8a4a11]" : "text-[#6e6e73]")}>
                                 {canRedeem ? template.rewardName : t('kiosk_status_remaining', { n: remainingStamps })}
                               </div>
                             </div>

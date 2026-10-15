@@ -7,7 +7,7 @@ import { Input } from "./ui/input";
 import { useAuth } from "./AuthProvider";
 
 const inputCls =
-  "h-12 rounded-xl border-black/[0.1] bg-[#f5f5f7] text-[#1d1d1f] placeholder:text-[#6e6e73]/50 focus-visible:border-[#1d1d1f] focus-visible:ring-0";
+  "h-12 rounded-xl border-black/[0.1] bg-[#f5f5f7] text-base text-[#1d1d1f] placeholder:text-[#6e6e73]/50 focus-visible:border-[#1d1d1f] focus-visible:ring-0";
 const labelCls = "block text-[11px] font-semibold uppercase tracking-[0.16em] text-[#6e6e73]";
 
 export const ForgotPasswordPage: React.FC = () => {

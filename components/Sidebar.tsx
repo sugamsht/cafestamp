@@ -70,7 +70,7 @@ export const SidebarContent: React.FC<SidebarContentProps> = ({ onNavigate, onSc
   const { t } = useLanguage();
 
   return (
-    <div className="flex h-full flex-col py-8">
+    <div className="flex h-full flex-col overflow-y-auto py-4 md:py-6">
       <div className="px-3 py-2">
         <div className="mb-6 px-4 flex items-center gap-3">
           <Link to="/" className="inline-flex items-center" onClick={onNavigate}>

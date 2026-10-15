@@ -375,10 +375,12 @@ export const AuthSplitLayout: React.FC<AuthSplitLayoutProps> = ({
             </div>
           </header>
 
-          <div className="mx-auto flex w-full max-w-[37rem] flex-1 flex-col justify-center py-6 sm:py-8 lg:py-10">
-            <MobileShowcase theme={theme} />
+          <div className="mx-auto flex w-full max-w-[37rem] flex-1 flex-col justify-center py-4 sm:py-8 lg:py-10">
+            <div className="hidden sm:block lg:hidden">
+              <MobileShowcase theme={theme} />
+            </div>
 
-            <div className="mt-8 text-center lg:mt-0 lg:text-left">
+            <div className="mt-3 sm:mt-8 text-center lg:mt-0 lg:text-left">
               {badge && (
                 <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#736b5e]">
                   {badge}
@@ -386,17 +388,17 @@ export const AuthSplitLayout: React.FC<AuthSplitLayoutProps> = ({
               )}
 
               <h1
-                className={`mt-3 text-[clamp(2.8rem,6.5vw,4.8rem)] font-semibold leading-[0.92] tracking-[-0.06em] text-[#171512] ${titleClassName ?? ""}`}
+                className={`mt-2 sm:mt-3 text-[clamp(2.2rem,6vw,4.8rem)] font-semibold leading-[0.95] tracking-[-0.05em] text-[#171512] ${titleClassName ?? ""}`}
               >
                 {title}
               </h1>
 
-              <p className="mx-auto mt-4 max-w-[34rem] text-base leading-7 text-[#635b4e] sm:text-lg lg:mx-0">
+              <p className="mx-auto mt-2 sm:mt-4 max-w-[34rem] text-sm leading-6 text-[#635b4e] sm:text-lg sm:leading-7 lg:mx-0">
                 {subtitle}
               </p>
             </div>
 
-            <div className="mt-8 rounded-[2rem] border border-black/[0.08] bg-white/86 p-4 shadow-[0_18px_50px_-34px_rgba(0,0,0,0.28)] sm:p-6 lg:mt-10 lg:rounded-[2.15rem] lg:p-7">
+            <div className="mt-5 rounded-[1.75rem] sm:rounded-[2rem] border border-black/[0.08] bg-white/86 p-4 shadow-[0_18px_50px_-34px_rgba(0,0,0,0.28)] sm:p-6 lg:mt-10 lg:rounded-[2.15rem] lg:p-7">
               {children}
             </div>
           </div>

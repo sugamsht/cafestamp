@@ -191,7 +191,7 @@ export const TransactionsPage: React.FC<TransactionsPageProps> = ({ customers })
                 )}
             </div>
 
-             <div className="ml-auto flex items-center gap-2">
+             <div className="w-full sm:w-auto sm:ml-auto flex items-center justify-between sm:justify-end gap-2">
                  <Button
                     variant="outline"
                     size="sm"
@@ -204,13 +204,72 @@ export const TransactionsPage: React.FC<TransactionsPageProps> = ({ customers })
                  </Button>
                  <Button variant="ghost" size="sm" onClick={toggleSort} className="gap-2 text-muted-foreground">
                     <ArrowUpDown size={16} />
-                    {sortOrder === 'desc' ? 'Newest First' : 'Oldest First'}
+                    {sortOrder === 'desc' ? 'Newest' : 'Oldest'}
                  </Button>
             </div>
         </div>
 
-        {/* Table */}
+        {/* Table & Mobile Cards */}
         <div className="rounded-xl border bg-white flex-1 overflow-auto shadow-sm">
+            {/* Mobile cards view */}
+            <div className="space-y-3 p-3 md:hidden">
+              {filteredTransactions.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground flex flex-col items-center gap-2">
+                  <History size={28} className="opacity-20" />
+                  <p className="text-sm">No transactions found matching your filters.</p>
+                </div>
+              ) : (
+                visibleTransactions.map((tx) => (
+                  <div
+                    key={tx.id}
+                    className="rounded-2xl border border-border bg-white p-4 shadow-subtle space-y-3"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className={cn(
+                        "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border",
+                        getBadgeColor(tx.type)
+                      )}>
+                        {getIcon(tx.type)}
+                        {getLabel(tx.type)}
+                      </div>
+                      <div className="text-right font-mono text-[11px] text-muted-foreground">
+                        <div>{tx.date.split(',')[0]}</div>
+                        <div>{tx.date.split(',')[1]}</div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="font-semibold text-foreground text-sm">{tx.customerName}</div>
+                      <div className="text-xs text-muted-foreground">{tx.customerEmail}</div>
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs pt-2 border-t border-gray-100">
+                      <div>
+                        <span className="font-medium text-foreground">{tx.campaignName}</span>
+                        <span className="ml-2 font-mono text-[10px] text-muted-foreground bg-gray-100 px-1.5 py-0.5 rounded">
+                          #{tx.cardId.slice(0, 8)}
+                        </span>
+                      </div>
+                      <div className="text-right text-[11px] text-muted-foreground">
+                        <span>{tx.actorName || "Owner"}</span>
+                        <span className="ml-1 uppercase text-[9px] font-bold tracking-wider text-gray-400">
+                          ({tx.actorRole === "staff" ? "Staff" : "Owner"})
+                        </span>
+                      </div>
+                    </div>
+
+                    {tx.remarks && (
+                      <div className="text-xs text-muted-foreground italic bg-gray-50 rounded-lg px-2.5 py-1.5">
+                        "{tx.remarks}"
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Desktop Table View */}
+            <div className="hidden md:block">
             <Table>
                 <TableHeader>
                     <TableRow className="bg-muted/30">
@@ -276,6 +335,7 @@ export const TransactionsPage: React.FC<TransactionsPageProps> = ({ customers })
                     )}
                 </TableBody>
             </Table>
+            </div>
         </div>
         <div className="flex flex-col items-center gap-3">
             <div className="text-xs text-muted-foreground text-center">

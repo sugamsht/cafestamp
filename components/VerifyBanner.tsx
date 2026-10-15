@@ -42,7 +42,7 @@ export const VerifyBanner: React.FC = () => {
   };
 
   return (
-    <div className="mx-6 mt-6 rounded-lg border border-border/80 bg-card p-5 shadow-subtle">
+    <div className="mx-4 md:mx-6 mt-4 md:mt-6 rounded-2xl md:rounded-lg border border-border/80 bg-card p-4 md:p-5 shadow-subtle">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex items-start gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-lg border border-border/80 bg-background text-foreground shadow-subtle">

@@ -1151,19 +1151,19 @@ export const CardEditor: React.FC<CardEditorProps> = ({ initialTemplate, onSave 
             </Accordion>
         </div>
 
-        <div className="mt-8 border-t pt-6 lg:mt-auto lg:shrink-0">
+        <div className="sticky bottom-0 -mx-4 -mb-6 mt-6 bg-white/95 p-4 backdrop-blur border-t z-20 sm:-mx-6 sm:-mb-6 sm:mt-8 lg:static lg:mx-0 lg:mb-0 lg:bg-transparent lg:p-0 lg:border-t lg:pt-6 lg:mt-auto lg:shrink-0">
             {saveError && (
-                <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                <div className="mb-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm text-rose-700">
                     {saveError}
                 </div>
             )}
             <Button
               size="lg"
-              className="w-full gap-2 text-lg font-semibold h-14"
+              className="w-full gap-2 text-base sm:text-lg font-semibold h-12 sm:h-14 rounded-full sm:rounded-xl shadow-md"
               onClick={handleSave}
               disabled={saveBusy || logoUploadBusy || backgroundUploadBusy}
             >
-                {saveBusy ? 'Saving...' : 'Save'} <CheckIcon size={20} />
+                {saveBusy ? 'Saving...' : 'Save Campaign'} <CheckIcon size={20} />
             </Button>
         </div>
       </div>
@@ -1171,7 +1171,7 @@ export const CardEditor: React.FC<CardEditorProps> = ({ initialTemplate, onSave 
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
         <DialogContent
           className="
-            h-[100dvh] w-screen max-w-none rounded-none border-0 bg-gray-100 p-4 shadow-none lg:hidden
+            h-[100dvh] w-full max-w-none rounded-none border-0 bg-gray-100 p-4 shadow-none lg:hidden
             [&>button]:right-4 [&>button]:top-4 [&>button]:z-50 [&>button]:rounded-full
             [&>button]:bg-black/55 [&>button]:p-1 [&>button]:text-white [&>button]:opacity-100
           "

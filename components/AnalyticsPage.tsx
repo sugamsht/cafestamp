@@ -317,24 +317,24 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ customers, campaig
     distributionTotal === 0 ? 0 : (value / distributionTotal) * 100;
 
   return (
-    <div className="h-full overflow-y-auto flex flex-col space-y-8 bg-background p-6 md:p-8 animate-fade-in">
+    <div className="h-full overflow-y-auto flex flex-col space-y-6 md:space-y-8 bg-background p-4 md:p-8 animate-fade-in">
       <div className="flex flex-col gap-4">
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <h1 className="text-2xl md:text-4xl font-semibold tracking-tight text-foreground">Analytics</h1>
-          <p className="text-sm text-muted-foreground md:text-base">
+          <p className="text-xs text-muted-foreground sm:text-sm md:text-base">
             A quick pulse check on loyalty performance and customer activity.
           </p>
         </div>
-        <div className="flex flex-wrap items-end gap-3 rounded-lg border border-border/80 bg-card p-3 shadow-subtle">
-          <div className="flex items-center gap-2 pr-1 text-sm text-muted-foreground">
+        <div className="flex flex-wrap items-end gap-3 rounded-xl border border-border/80 bg-card p-3 shadow-subtle">
+          <div className="flex items-center gap-2 pr-1 text-xs sm:text-sm text-muted-foreground w-full sm:w-auto">
             <CalendarDays className="h-4 w-4" />
             Date range
           </div>
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-1 sm:flex-initial flex-col gap-1 min-w-[130px]">
             <label className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">From</label>
             <Input
               type="date"
-              className="h-10 w-[160px]"
+              className="h-9 sm:h-10 text-xs sm:text-sm w-full sm:w-[150px]"
               value={startDate}
               onChange={(event) => {
                 const value = event.target.value;
@@ -343,11 +343,11 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ customers, campaig
               }}
             />
           </div>
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-1 sm:flex-initial flex-col gap-1 min-w-[130px]">
             <label className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">To</label>
             <Input
               type="date"
-              className="h-10 w-[160px]"
+              className="h-9 sm:h-10 text-xs sm:text-sm w-full sm:w-[150px]"
               value={endDate}
               onChange={(event) => {
                 const value = event.target.value;
@@ -356,23 +356,25 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ customers, campaig
               }}
             />
           </div>
-          <div className="flex items-center gap-2">
-            <Button type="button" variant="outline" size="sm" onClick={() => applyPresetRange(7)}>
+          <div className="flex items-center gap-1.5">
+            <Button type="button" variant="outline" size="sm" className="h-8 px-2.5 text-xs" onClick={() => applyPresetRange(7)}>
               7D
             </Button>
-            <Button type="button" variant="outline" size="sm" onClick={() => applyPresetRange(14)}>
+            <Button type="button" variant="outline" size="sm" className="h-8 px-2.5 text-xs" onClick={() => applyPresetRange(14)}>
               14D
             </Button>
-            <Button type="button" variant="outline" size="sm" onClick={() => applyPresetRange(30)}>
+            <Button type="button" variant="outline" size="sm" className="h-8 px-2.5 text-xs" onClick={() => applyPresetRange(30)}>
               30D
             </Button>
           </div>
-          <Badge variant="outline" className="border-border/80 bg-card text-muted-foreground shadow-subtle">
-            {rangeLabel}
-          </Badge>
-          <Badge variant="secondary" className="text-muted-foreground">
-            {Math.max(0, selectedDayCount)} days
-          </Badge>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Badge variant="outline" className="border-border/80 bg-card text-muted-foreground shadow-subtle text-[11px]">
+              {rangeLabel}
+            </Badge>
+            <Badge variant="secondary" className="text-muted-foreground text-[11px]">
+              {Math.max(0, selectedDayCount)} days
+            </Badge>
+          </div>
         </div>
       </div>
 

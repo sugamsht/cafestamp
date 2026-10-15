@@ -139,7 +139,7 @@ export const TemplatesGallery: React.FC = () => {
         </div>
       </header>
 
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-10 pb-12 px-2 md:px-4">
+      <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-8 sm:gap-10 pb-12 px-2 md:px-4">
         {filteredTemplates.map((template) => (
           <ResponsiveCardPreview 
             key={template.id} 

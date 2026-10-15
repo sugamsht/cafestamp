@@ -111,35 +111,35 @@ const ResponsiveCardItem: React.FC<ResponsiveCardItemProps> = ({
                     </p>
                 </div>
                 
-                <div className="flex items-center justify-center gap-3">
+                <div className="flex flex-wrap items-center justify-center gap-2">
                     <Button 
                         size="sm" 
-                        className="rounded-full px-6 gap-2 shadow-sm font-semibold" 
+                        className="rounded-full px-5 gap-2 shadow-sm font-semibold" 
                         onClick={openActiveView}
                     >
                         <Play size={16} fill="currentColor" /> Open
                     </Button>
-                    <div className="flex items-center gap-1.5">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            className="rounded-full gap-1.5"
-                            onClick={() => onShowSignupQr(card)}
-                            title="Show signup QR"
-                        >
-                            <QrCode size={14} /> QR
-                        </Button>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            className="rounded-full gap-1.5"
-                            onClick={() => onToggleEnabled(card.id, card.isEnabled === false)}
-                            disabled={toggleBusy}
-                            title={card.isEnabled === false ? 'Enable campaign' : 'Disable campaign'}
-                        >
-                            <Power size={14} />
-                            {card.isEnabled === false ? 'Enable' : 'Disable'}
-                        </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="rounded-full gap-1.5"
+                        onClick={() => onShowSignupQr(card)}
+                        title="Show signup QR"
+                    >
+                        <QrCode size={14} /> QR
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="rounded-full gap-1.5"
+                        onClick={() => onToggleEnabled(card.id, card.isEnabled === false)}
+                        disabled={toggleBusy}
+                        title={card.isEnabled === false ? 'Enable campaign' : 'Disable campaign'}
+                    >
+                        <Power size={14} />
+                        {card.isEnabled === false ? 'Enable' : 'Disable'}
+                    </Button>
+                    <div className="flex items-center gap-1">
                         <Button 
                             variant="ghost" 
                             size="icon" 
@@ -254,7 +254,7 @@ export const MyCards: React.FC<MyCardsProps> = ({
           <Button onClick={handleCreateNew} size="lg" className="rounded-full text-lg px-8 h-14">Create your first campaign</Button>
         </div>
       ) : (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-10 pb-12 px-2 md:px-4">
+        <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-8 sm:gap-10 pb-12 px-2 md:px-4">
           {cards.map((card) => (
             <ResponsiveCardItem 
                 key={card.id} 
