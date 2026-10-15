@@ -243,7 +243,16 @@ const PublicCardWrapper: React.FC = () => {
         template = fromStoredTemplate(stored);
       }
 
-      if (template) setCardData({ card, customer, template });
+      if (template) {
+        setCardData({ card, customer, template });
+        try {
+          if (slug && card.campaignId && card.uniqueId) {
+            localStorage.setItem(`stampee_card_${slug}_${card.campaignId}`, card.uniqueId);
+          }
+        } catch {
+          // ignore
+        }
+      }
       setLoading(false);
     })();
   }, [slug, uniqueId]);

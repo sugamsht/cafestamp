@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Button } from './ui/button';
@@ -12,6 +12,8 @@ import { LanguageSwitcher } from './LanguageSwitcher';
 export const PublicCampaignSignupPage: React.FC = () => {
   const { t, language } = useLanguage();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const forceNew = searchParams.get('new') === 'true';
   const { slug, campaignId } = useParams<{ slug: string; campaignId: string }>();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -32,6 +34,21 @@ export const PublicCampaignSignupPage: React.FC = () => {
       return;
     }
 
+    if (!forceNew) {
+      try {
+        const savedCardId = localStorage.getItem(`stampee_card_${slug}_${campaignId}`);
+        if (savedCardId) {
+          setPreRedirectMessage(t('signup_redirect_wait'));
+          const timer = setTimeout(() => {
+            navigate(`/${slug}/${savedCardId}`, { replace: true });
+          }, 350);
+          return () => clearTimeout(timer);
+        }
+      } catch {
+        // ignore in private browsing / SSR
+      }
+    }
+
     let active = true;
     void (async () => {
       const payload = await fetchPublicCampaignSignupContext(slug, campaignId);
@@ -43,7 +60,7 @@ export const PublicCampaignSignupPage: React.FC = () => {
     return () => {
       active = false;
     };
-  }, [campaignId, slug]);
+  }, [campaignId, forceNew, navigate, slug, t]);
 
   const disabled = context?.campaign.isEnabled === false;
   const isShowingPreRedirectLoader = preRedirectMessage.length > 0;
@@ -76,6 +93,11 @@ export const PublicCampaignSignupPage: React.FC = () => {
     });
 
     if (result.outcome === 'issued' || result.outcome === 'redirect_existing') {
+      try {
+        localStorage.setItem(`stampee_card_${slug}_${campaignId}`, result.uniqueId);
+      } catch {
+        // ignore
+      }
       setPreRedirectMessage(
         result.outcome === 'issued'
           ? t('signup_gen_wait')
