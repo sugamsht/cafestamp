@@ -7,7 +7,7 @@ import { Label } from './ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Plus, Gift, History, User, ChevronLeft, Minus, Lock, CheckCircle, RefreshCcw, ShieldCheck, Clock3, AlertCircle } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { formatDateTime } from '../lib/locale';
+import { formatDateTime, translateRewardName } from '../lib/locale';
 import type { AwardStampResult, RedeemRewardResult } from '../lib/db/issuedCards';
 import { useLanguage } from '../lib/i18n/LanguageContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
@@ -363,7 +363,7 @@ export const KioskMode: React.FC<KioskModeProps> = ({
                         <div>
                             <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#6b705c]">{t('kiosk_reward_status')}</p>
                             <p className="mt-3 text-lg font-semibold text-[#1d1d1f]">{isLocked ? t('kiosk_status_completed') : canRedeem ? t('kiosk_status_claim') : t('kiosk_status_remaining', { n: remainingStamps })}</p>
-                            <p className="mt-1 text-sm text-[#5f6368]">{template.rewardName}</p>
+                            <p className="mt-1 text-sm text-[#5f6368]">{translateRewardName(template.rewardName, language)}</p>
                         </div>
                         <div className={cn(
                             "flex h-11 w-11 items-center justify-center rounded-2xl",

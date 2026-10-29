@@ -549,7 +549,7 @@ export const SettingsPage: React.FC = () => {
               {t('cancel')}
             </Button>
             <Button onClick={handleReset} disabled={resetBusy}>
-              {resetBusy ? t('settings_saving') : "Actualizar PIN"}
+              {resetBusy ? t('settings_saving') : t('settings_update_pin')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -558,11 +558,11 @@ export const SettingsPage: React.FC = () => {
       <Dialog open={!!deleteStaffTarget} onOpenChange={(open) => !open && setDeleteStaffTarget(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>¿Eliminar cuenta de personal?</DialogTitle>
+            <DialogTitle>{t('settings_delete_staff_title')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             <p className="text-sm text-muted-foreground">
-              Esto eliminará permanentemente a <span className="font-semibold text-foreground">{deleteStaffTarget?.name}</span> y revocará su acceso con PIN.
+              {t('settings_delete_staff_desc', { name: deleteStaffTarget?.name ?? '' })}
             </p>
             {deleteStaffError && (
               <div className="text-sm text-rose-600">{deleteStaffError}</div>
@@ -582,14 +582,14 @@ export const SettingsPage: React.FC = () => {
       <Dialog open={isDeleteStepOneOpen} onOpenChange={(open) => !deleteAccountBusy && setIsDeleteStepOneOpen(open)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Eliminar Cuenta: Paso 1 de 2</DialogTitle>
+            <DialogTitle>{t('settings_delete_account_step1_title')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3 text-sm text-muted-foreground">
             <p>
-              Estás a punto de eliminar <span className="font-semibold text-foreground">{currentOwner?.businessName}</span>.
+              {t('settings_delete_account_step1_about', { name: currentOwner?.businessName ?? '' })}
             </p>
-            <p>Esto eliminará el acceso de propietario, todas las cuentas de camareros, campañas e historial de clientes.</p>
-            <p className="text-rose-600 font-medium">Esta acción no se puede deshacer.</p>
+            <p>{t('settings_delete_account_step1_warning')}</p>
+            <p className="text-rose-600 font-medium">{t('settings_delete_account_irreversible')}</p>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsDeleteStepOneOpen(false)}>
@@ -604,7 +604,7 @@ export const SettingsPage: React.FC = () => {
                 setIsDeleteStepTwoOpen(true);
               }}
             >
-              Continuar
+              {t('settings_continue')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -623,11 +623,11 @@ export const SettingsPage: React.FC = () => {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Eliminar Cuenta: Paso 2 de 2</DialogTitle>
+            <DialogTitle>{t('settings_delete_account_step2_title')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             <p className="text-sm text-muted-foreground">
-              Escribe <span className="font-mono font-semibold text-foreground">{DELETE_CONFIRMATION}</span> para confirmar la eliminación permanente de esta cuenta.
+              {t('settings_delete_account_step2_desc', { confirmation: DELETE_CONFIRMATION })}
             </p>
             <Input
               value={deleteConfirmText}
@@ -645,7 +645,7 @@ export const SettingsPage: React.FC = () => {
               onClick={handleDeleteFinal}
               disabled={deleteAccountBusy || deleteConfirmText.trim().toUpperCase() !== DELETE_CONFIRMATION}
             >
-              {deleteAccountBusy ? t('settings_saving') : "Eliminar Definitivamente"}
+              {deleteAccountBusy ? t('settings_saving') : t('settings_delete_permanently')}
             </Button>
           </DialogFooter>
         </DialogContent>

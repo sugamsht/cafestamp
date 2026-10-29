@@ -6,7 +6,14 @@ import { QrCodeDisplay } from './ui/qr-code-display';
 import { generateReward } from '../services/rewardService';
 import { Template, Transaction } from '../types';
 import { cn, resolveHexAndOpacity, hexToRgba } from '../lib/utils';
-import { translateTransactionTitle, translateTransactionRemarks } from '../lib/locale';
+import {
+  translateTransactionTitle,
+  translateTransactionRemarks,
+  translateTagline,
+  translateRewardName,
+  translateCampaignName,
+  translateCampaignDescription
+} from '../lib/locale';
 import { useLanguage } from '../lib/i18n/LanguageContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { useAuth } from './AuthProvider';
@@ -99,6 +106,12 @@ export const LoyaltyCard: React.FC<LoyaltyCardProps> = ({
   }, [template.id, template.totalStamps, currentStamps]);
 
   const { colors, icon: Icon, totalStamps, rewardName, showLogo } = template;
+  const effectiveRewardName = translateRewardName(rewardName, language);
+  const effectiveName = translateCampaignName(template.name, language);
+  const effectiveDescription = translateCampaignDescription(template.description, language);
+  const effectiveTagline = template.tagline
+    ? translateTagline(template.tagline, language, totalStamps)
+    : t('card_collect_stamps', { total: totalStamps, reward: effectiveRewardName });
 
   const orderedSocial = [
     'tiktok',
@@ -360,9 +373,11 @@ export const LoyaltyCard: React.FC<LoyaltyCardProps> = ({
       {mode === 'preview' && onBack && (
          <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-50 bg-black/5 backdrop-blur-sm">
            <button onClick={onBack} className="text-sm font-semibold px-4 py-2 bg-white/50 rounded-full hover:bg-white/80 transition-all">
-             ← Templates
+             ← {t('campaigns_title')}
            </button>
-           <span className="text-xs uppercase tracking-widest opacity-50 font-bold">Preview Mode</span>
+           <span className="text-xs uppercase tracking-widest opacity-50 font-bold">
+             {language === 'es' ? 'Modo Vista Previa' : 'Preview Mode'}
+           </span>
          </div>
       )}
 
@@ -463,7 +478,7 @@ export const LoyaltyCard: React.FC<LoyaltyCardProps> = ({
                   )}
                   style={{ color: textColor.hex }}
                 >
-                  {template.name}
+                  {effectiveName}
                 </h1>
                 {mode === 'public' ? (
                     <p
@@ -474,7 +489,7 @@ export const LoyaltyCard: React.FC<LoyaltyCardProps> = ({
                       )}
                       style={{ color: hexToRgba(mutedColor.hex, mutedColor.opacity) }}
                     >
-                      {template.description}
+                      {effectiveDescription}
                     </p>
                 ) : (
                     <p
@@ -485,7 +500,7 @@ export const LoyaltyCard: React.FC<LoyaltyCardProps> = ({
                       )}
                       style={{ color: hexToRgba(mutedColor.hex, mutedColor.opacity) }}
                     >
-                    {template.tagline ? template.tagline : t('card_collect_stamps', { total: totalStamps, reward: rewardName })}
+                    {effectiveTagline}
                     </p>
                 )}
               </div>
@@ -536,7 +551,7 @@ export const LoyaltyCard: React.FC<LoyaltyCardProps> = ({
                      {t('card_congratulations')}
                    </h3>
                    <p className={cn("text-base md:text-lg text-gray-600 leading-snug", isMobileCompleted && "text-sm")}>
-                      {t('card_free_reward', { reward: rewardName })}
+                      {t('card_free_reward', { reward: effectiveRewardName })}
                    </p>
                  </div>
               ) : (
@@ -547,7 +562,7 @@ export const LoyaltyCard: React.FC<LoyaltyCardProps> = ({
                     )}
                     style={{ color: textColor.hex }}
                   >
-                    <p>{t('card_reward')}: {rewardName}</p>
+                    <p>{t('card_reward')}: {effectiveRewardName}</p>
                   </div>
               )}
 
@@ -732,7 +747,7 @@ export const LoyaltyCard: React.FC<LoyaltyCardProps> = ({
              onClick={onCreate}
              className="shadow-2xl hover:scale-105 active:scale-95 transition-all bg-black text-white px-8 py-4 rounded-full font-bold text-lg flex items-center gap-2"
            >
-             Create <Icon size={20} />
+             {language === 'es' ? 'Crear' : 'Create'} <Icon size={20} />
            </button>
         </div>
       )}
@@ -743,8 +758,8 @@ export const LoyaltyCard: React.FC<LoyaltyCardProps> = ({
           isOpen={showReward} 
           loading={loadingReward} 
           reward={rewardData} 
-          rewardName={rewardName}
-          businessName={template.name}
+          rewardName={effectiveRewardName}
+          businessName={effectiveName}
           showCloseButton={!(mode === 'public' || (mode === 'active' && readOnly))}
           scope={mode === 'active' && readOnly ? 'container' : 'fullscreen'}
           onClose={resetCard}

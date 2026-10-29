@@ -6,8 +6,8 @@ import { LayoutGrid } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Button } from './ui/button';
 import { useNavigate } from 'react-router-dom';
-
-const CATEGORIES = ["All", "Food & Drink", "Beauty & Wellness", "Services", "Retail"];
+import { useLanguage } from '../lib/i18n/LanguageContext';
+import { translateCampaignName, translateRewardName } from '../lib/locale';
 
 const TEMPLATE_CATEGORIES: Record<string, string> = {
   'cookie-classic': 'Food & Drink',
@@ -27,6 +27,7 @@ interface ResponsiveCardPreviewProps {
 }
 
 const ResponsiveCardPreview: React.FC<ResponsiveCardPreviewProps> = ({ template, onSelect }) => {
+    const { t, language } = useLanguage();
     const containerRef = useRef<HTMLDivElement>(null);
     const [scale, setScale] = useState(1);
 
@@ -77,16 +78,16 @@ const ResponsiveCardPreview: React.FC<ResponsiveCardPreviewProps> = ({ template,
 
             <div className="text-center space-y-2 w-full px-2">
                 <h3 className="font-bold text-2xl text-foreground tracking-tight group-hover:text-primary transition-colors truncate">
-                    {template.name}
+                    {translateCampaignName(template.name, language)}
                 </h3>
                  <div className="flex items-center justify-center gap-2 flex-wrap">
                     <span className={cn(
                         "text-xs px-2.5 py-1 rounded-full font-semibold bg-secondary text-secondary-foreground border"
                     )}>
-                        {template.totalStamps} Stamps
+                        {t('gallery_stamps_count', { count: template.totalStamps })}
                     </span>
-                    <span className="text-xs text-muted-foreground truncate max-w-[200px]" title={template.rewardName}>
-                       {template.rewardName}
+                    <span className="text-xs text-muted-foreground truncate max-w-[200px]" title={translateRewardName(template.rewardName, language)}>
+                       {translateRewardName(template.rewardName, language)}
                     </span>
                 </div>
             </div>
@@ -95,12 +96,22 @@ const ResponsiveCardPreview: React.FC<ResponsiveCardPreviewProps> = ({ template,
 }
 
 export const TemplatesGallery: React.FC = () => {
+  const { t } = useLanguage();
   const navigate = useNavigate();
-  const [activeCategory, setActiveCategory] = useState("All");
+  const [activeCategory, setActiveCategory] = useState("all");
+
+  const categories = [
+    { id: 'all', label: t('gallery_cat_all') },
+    { id: 'food', label: t('gallery_cat_food'), match: 'Food & Drink' },
+    { id: 'beauty', label: t('gallery_cat_beauty'), match: 'Beauty & Wellness' },
+    { id: 'services', label: t('gallery_cat_services'), match: 'Services' },
+    { id: 'retail', label: t('gallery_cat_retail'), match: 'Retail' }
+  ];
 
   const filteredTemplates = templates.filter(template => {
-    if (activeCategory === "All") return true;
-    return TEMPLATE_CATEGORIES[template.id] === activeCategory;
+    if (activeCategory === "all") return true;
+    const cat = categories.find(c => c.id === activeCategory);
+    return cat?.match ? TEMPLATE_CATEGORIES[template.id] === cat.match : true;
   });
 
   const handleSelect = (id: string) => {
@@ -115,25 +126,25 @@ export const TemplatesGallery: React.FC = () => {
                 <LayoutGrid size={24} />
             </div>
             <div>
-                <h1 className="text-3xl font-bold tracking-tight text-foreground">Templates</h1>
-                <p className="text-muted-foreground">Select a design to start your customer loyalty program.</p>
+                <h1 className="text-3xl font-bold tracking-tight text-foreground">{t('gallery_title')}</h1>
+                <p className="text-muted-foreground">{t('gallery_subtitle')}</p>
             </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-            {CATEGORIES.map((category) => (
+            {categories.map((cat) => (
                 <Button
-                    key={category}
-                    variant={activeCategory === category ? "default" : "outline"}
-                    onClick={() => setActiveCategory(category)}
+                    key={cat.id}
+                    variant={activeCategory === cat.id ? "default" : "outline"}
+                    onClick={() => setActiveCategory(cat.id)}
                     className={cn(
                         "rounded-full px-4 h-8 text-xs font-medium transition-all",
-                        activeCategory === category 
+                        activeCategory === cat.id 
                             ? "shadow-md hover:opacity-90" 
                             : "bg-white hover:bg-gray-100 border-gray-200 text-gray-600"
                     )}
                 >
-                    {category}
+                    {cat.label}
                 </Button>
             ))}
         </div>

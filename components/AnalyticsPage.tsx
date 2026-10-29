@@ -15,6 +15,7 @@ import {
   TrendingUp
 } from "lucide-react";
 import { useLanguage } from "../lib/i18n/LanguageContext";
+import { translateCampaignName } from "../lib/locale";
 
 interface AnalyticsPageProps {
   customers: Customer[];
@@ -562,7 +563,7 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ customers, campaig
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                   <div>
                     <div className="flex items-center gap-2">
-                      <div className="text-sm font-semibold text-foreground">{campaign.name}</div>
+                      <div className="text-sm font-semibold text-foreground">{translateCampaignName(campaign.name, language)}</div>
                       {campaign.archived && <Badge variant="outline">{t('analytics_archived')}</Badge>}
                     </div>
                     <div className="text-xs text-muted-foreground">

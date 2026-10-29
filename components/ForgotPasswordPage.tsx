@@ -5,12 +5,14 @@ import { AuthLayout } from "./AuthLayout";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { useAuth } from "./AuthProvider";
+import { useLanguage } from "../lib/i18n/LanguageContext";
 
 const inputCls =
   "h-12 rounded-xl border-black/[0.1] bg-[#f5f5f7] text-base text-[#1d1d1f] placeholder:text-[#6e6e73]/50 focus-visible:border-[#1d1d1f] focus-visible:ring-0";
 const labelCls = "block text-[11px] font-semibold uppercase tracking-[0.16em] text-[#6e6e73]";
 
 export const ForgotPasswordPage: React.FC = () => {
+  const { t } = useLanguage();
   const { currentUser, resetPassword } = useAuth();
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
@@ -25,7 +27,7 @@ export const ForgotPasswordPage: React.FC = () => {
     event.preventDefault();
     setError("");
     if (!email.trim()) {
-      setError("Please enter your email address.");
+      setError(t('forgot_empty_email'));
       return;
     }
     setBusy(true);
@@ -41,9 +43,9 @@ export const ForgotPasswordPage: React.FC = () => {
   if (sent) {
     return (
       <AuthLayout
-        title="Check your inbox."
-        subtitle="We sent a password reset link to your email."
-        badge="Done"
+        title={t('forgot_sent_title')}
+        subtitle={t('forgot_sent_subtitle')}
+        badge={t('dashboard_step_completed')}
         theme="login"
       >
         <div className="space-y-6 text-center">
@@ -51,16 +53,16 @@ export const ForgotPasswordPage: React.FC = () => {
             <CheckCircle2 className="h-14 w-14 text-green-500" />
           </div>
           <div>
-            <h2 className="text-xl font-semibold text-[#1d1d1f]">Reset link sent!</h2>
+            <h2 className="text-xl font-semibold text-[#1d1d1f]">{t('forgot_sent_heading')}</h2>
             <p className="mt-1 text-sm text-[#6e6e73]">
-              Check <span className="font-medium text-[#1d1d1f]">{email}</span> for a password reset link.
+              {t('forgot_sent_body', { email })}
             </p>
           </div>
           <Link
             to="/login"
             className="inline-flex h-12 w-full items-center justify-center rounded-full bg-[#1d1d1f] text-base font-medium text-white shadow-sm hover:bg-black/80"
           >
-            Back to Sign In
+            {t('forgot_back_to_login')}
             <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
         </div>
@@ -70,19 +72,19 @@ export const ForgotPasswordPage: React.FC = () => {
 
   return (
     <AuthLayout
-      title="Forgot your password?"
-      subtitle="Enter your account email and we'll send you a reset link."
-      badge="Reset password"
+      title={t('forgot_title')}
+      subtitle={t('forgot_subtitle')}
+      badge={t('forgot_badge')}
       theme="login"
     >
       <form className="space-y-5" onSubmit={handleSubmit}>
         <div className="mb-2">
-          <h2 className="text-xl font-semibold text-[#1d1d1f]">Find your account</h2>
-          <p className="mt-1 text-sm text-[#6e6e73]">Enter the email you used to sign up.</p>
+          <h2 className="text-xl font-semibold text-[#1d1d1f]">{t('forgot_find_account')}</h2>
+          <p className="mt-1 text-sm text-[#6e6e73]">{t('forgot_find_account_sub')}</p>
         </div>
 
         <div className="space-y-1.5">
-          <label className={labelCls}>Email</label>
+          <label className={labelCls}>{t('forgot_email_label')}</label>
           <Input
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -105,14 +107,14 @@ export const ForgotPasswordPage: React.FC = () => {
           disabled={busy}
           className="h-12 w-full rounded-full bg-[#1d1d1f] text-base font-medium text-white shadow-sm hover:bg-black/80"
         >
-          {busy ? "Sending..." : "Send Reset Link"}
+          {busy ? t('forgot_sending') : t('forgot_send_btn')}
           {!busy && <ArrowRight className="ml-2 h-4 w-4" />}
         </Button>
 
         <p className="text-center text-sm text-[#6e6e73]">
-          Remember your password?{" "}
+          {t('forgot_remember')}{" "}
           <Link to="/login" className="font-semibold text-[#1d1d1f] underline-offset-2 hover:underline">
-            Sign in
+            {t('forgot_sign_in')}
           </Link>
         </p>
       </form>

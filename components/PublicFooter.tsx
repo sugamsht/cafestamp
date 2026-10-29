@@ -1,7 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useLanguage } from "../lib/i18n/LanguageContext";
 
 export const PublicFooter: React.FC = () => {
+  const { t } = useLanguage();
+
   return (
     <footer className="border-t border-white/[0.07] bg-[#1d1d1f] px-6 py-8">
       <div className="mx-auto flex max-w-[88rem] flex-col items-center gap-3 sm:flex-row sm:justify-between">
@@ -13,31 +16,31 @@ export const PublicFooter: React.FC = () => {
             to="/showcase"
             className="text-xs font-medium text-white/55 transition-colors hover:text-white"
           >
-            Demos & Templates
+            {t('footer_demos')}
           </Link>
           <Link
             to="/articles"
             className="text-xs font-medium text-white/55 transition-colors hover:text-white"
           >
-            Articles
+            {t('footer_articles')}
           </Link>
           <Link
             to="/privacy-policy"
             className="text-xs font-medium text-white/55 transition-colors hover:text-white"
           >
-            Privacy Policy
+            {t('footer_privacy')}
           </Link>
           <Link
             to="/cookie"
             className="text-xs font-medium text-white/55 transition-colors hover:text-white"
           >
-            Cookie Policy
+            {t('footer_cookies')}
           </Link>
           <Link
             to="/terms"
             className="text-xs font-medium text-white/55 transition-colors hover:text-white"
           >
-            Terms
+            {t('footer_terms')}
           </Link>
           <a
             href="mailto:hello@stampee.co"
@@ -45,7 +48,7 @@ export const PublicFooter: React.FC = () => {
           >
             hello@stampee.co
           </a>
-          <p className="text-xs text-white/25">© {new Date().getFullYear()} Stampee. All rights reserved.</p>
+          <p className="text-xs text-white/25">© {new Date().getFullYear()} Stampee. {t('footer_rights')}</p>
         </div>
       </div>
     </footer>

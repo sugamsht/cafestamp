@@ -19,7 +19,7 @@ import { useAuth } from './AuthProvider';
 import { loadFromStorage, saveToStorage } from '../lib/storage';
 import { cn } from '../lib/utils';
 import { useLanguage } from '../lib/i18n/LanguageContext';
-import { formatDateTime } from '../lib/locale';
+import { formatDateTime, translateCampaignName } from '../lib/locale';
 
 interface DashboardPageProps {
   campaigns: Template[];
@@ -382,7 +382,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ campaigns, custome
                       <div>
                         <p className="font-semibold text-foreground">{formatAction(transaction.type)}</p>
                         <p className="text-sm text-muted-foreground">
-                          {transaction.customerName} {t('dashboard_on')} {transaction.campaignName}
+                          {transaction.customerName} {t('dashboard_on')} {translateCampaignName(transaction.campaignName, language)}
                         </p>
                       </div>
                     </div>

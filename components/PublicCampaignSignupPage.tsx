@@ -8,6 +8,7 @@ import { isSupabaseConfigured } from '../lib/supabase';
 import { ShieldCheck, Info } from 'lucide-react';
 import { useLanguage } from '../lib/i18n/LanguageContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { translateCampaignName } from '../lib/locale';
 
 export const PublicCampaignSignupPage: React.FC = () => {
   const { t, language } = useLanguage();
@@ -175,7 +176,7 @@ export const PublicCampaignSignupPage: React.FC = () => {
             {context.owner.businessName}
           </h1>
           <p className="mt-3 text-[0.98rem] leading-7 text-[#4f5258]">
-            {t('signup_join_campaign', { campaign: context.campaign.name })}
+            {t('signup_join_campaign', { campaign: translateCampaignName(context.campaign.name, language) })}
           </p>
 
           {disabled && (

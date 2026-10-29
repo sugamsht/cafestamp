@@ -9,6 +9,7 @@ import { Search, CreditCard, ChevronRight, UserPlus, CheckCircle2, User, ArrowLe
 import { useAuth } from './AuthProvider';
 import { buildPublicCardUrl } from '../lib/links';
 import { useLanguage } from '../lib/i18n/LanguageContext';
+import { translateCampaignName } from '../lib/locale';
 
 interface IssueCardDialogProps {
     isOpen: boolean;
@@ -29,7 +30,7 @@ export const IssueCardDialog: React.FC<IssueCardDialogProps> = ({
     preSelectedCampaign = null,
     preSelectedCustomer = null
 }) => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const { currentOwner } = useAuth();
     const slug = currentOwner?.slug ?? "";
     // State
@@ -61,7 +62,7 @@ export const IssueCardDialog: React.FC<IssueCardDialogProps> = ({
                     setSelectedCampaign(null);
                     setSelectedCustomer(null);
                     setStep('campaign');
-                    setFlowError(t('issue_dialog_campaign_disabled_error', { name: preSelectedCampaign.name }));
+                    setFlowError(t('issue_dialog_campaign_disabled_error', { name: translateCampaignName(preSelectedCampaign.name, language) }));
                 } else {
                     setSelectedCampaign(preSelectedCampaign);
                     setSelectedCustomer(preSelectedCustomer);
@@ -72,7 +73,7 @@ export const IssueCardDialog: React.FC<IssueCardDialogProps> = ({
                     setSelectedCampaign(null);
                     setSelectedCustomer(null);
                     setStep('campaign');
-                    setFlowError(t('issue_dialog_campaign_disabled_error', { name: preSelectedCampaign.name }));
+                    setFlowError(t('issue_dialog_campaign_disabled_error', { name: translateCampaignName(preSelectedCampaign.name, language) }));
                 } else {
                     setSelectedCampaign(preSelectedCampaign);
                     setStep('customer');
@@ -82,7 +83,7 @@ export const IssueCardDialog: React.FC<IssueCardDialogProps> = ({
                 setSelectedCustomer(null);
             }
         }
-    }, [isOpen, preSelectedCampaign, preSelectedCustomer, t]);
+    }, [isOpen, preSelectedCampaign, preSelectedCustomer, t, language]);
 
     // Filtering
     const filteredCampaigns = campaigns.filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -94,7 +95,7 @@ export const IssueCardDialog: React.FC<IssueCardDialogProps> = ({
     // Handlers
     const handleSelectCampaign = (c: Template) => {
         if (c.isEnabled === false) {
-            setFlowError(t('issue_dialog_campaign_disabled_error', { name: c.name }));
+            setFlowError(t('issue_dialog_campaign_disabled_error', { name: translateCampaignName(c.name, language) }));
             return;
         }
         setFlowError("");
@@ -120,7 +121,7 @@ export const IssueCardDialog: React.FC<IssueCardDialogProps> = ({
     const handleConfirmIssue = async () => {
         if (!selectedCampaign) return;
         if (selectedCampaign.isEnabled === false) {
-            setSubmitError(t('issue_dialog_campaign_disabled_error', { name: selectedCampaign.name }));
+            setSubmitError(t('issue_dialog_campaign_disabled_error', { name: translateCampaignName(selectedCampaign.name, language) }));
             return;
         }
         setSubmitError("");
@@ -195,7 +196,7 @@ export const IssueCardDialog: React.FC<IssueCardDialogProps> = ({
                                                 {c.isEnabled === false ? <Ban size={18} /> : <CreditCard size={20} />}
                                             </div>
                                             <div>
-                                                <p className="font-semibold text-sm">{c.name}</p>
+                                                <p className="font-semibold text-sm">{translateCampaignName(c.name, language)}</p>
                                                 <p className="text-xs text-muted-foreground">{t('issue_dialog_stamps_count', { count: c.totalStamps })} {c.isEnabled === false ? `• ${t('issue_dialog_disabled_badge')}` : ''}</p>
                                             </div>
                                         </div>
@@ -245,7 +246,7 @@ export const IssueCardDialog: React.FC<IssueCardDialogProps> = ({
                     {step === 'review' && (
                         <div className="flex h-full flex-col items-center justify-center space-y-6 p-4 text-center sm:p-6">
                             <div className="mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 text-blue-600"><CheckCircle2 size={32} /></div>
-                            <div className="w-full space-y-1"><p className="text-sm uppercase tracking-wider text-muted-foreground">{t('issue_dialog_issuing_card_label')}</p><div className="text-lg font-bold sm:text-xl">{selectedCampaign?.name}</div></div>
+                            <div className="w-full space-y-1"><p className="text-sm uppercase tracking-wider text-muted-foreground">{t('issue_dialog_issuing_card_label')}</p><div className="text-lg font-bold sm:text-xl">{translateCampaignName(selectedCampaign?.name, language)}</div></div>
                             <div className="w-full space-y-1 border-y py-4"><p className="text-sm uppercase tracking-wider text-muted-foreground">{t('issue_dialog_to_customer_label')}</p><div className="flex items-center justify-center gap-2 text-base font-semibold sm:text-lg"><User size={18} />{selectedCustomer ? selectedCustomer.name : newCustomerData.name}</div></div>
                             {submitError && (
                                 <div className="w-full rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">

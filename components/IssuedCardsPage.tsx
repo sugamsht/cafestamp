@@ -25,6 +25,7 @@ import { upsertCustomer } from '../lib/db/customers';
 import { useSubscriptionContext } from './SubscriptionContext';
 import { useLanguage } from '../lib/i18n/LanguageContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { translateCampaignName } from '../lib/locale';
 
 interface IssuedCardsPageProps {
   customers: Customer[];
@@ -35,7 +36,7 @@ interface IssuedCardsPageProps {
 }
 
 export const IssuedCardsPage: React.FC<IssuedCardsPageProps> = ({ customers, campaigns, setCustomers, refreshData, dataReady = false }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const { currentOwner, isEmailVerified, isStaff, currentUser } = useAuth();
@@ -637,7 +638,7 @@ export const IssuedCardsPage: React.FC<IssuedCardsPageProps> = ({ customers, cam
                       </div>
                       <div className={cn("min-w-0", isRedeemed && "opacity-60")}>
                         <div className="flex flex-wrap items-center gap-2">
-                          <h2 className="text-sm font-semibold text-foreground">{card.campaignName}</h2>
+                          <h2 className="text-sm font-semibold text-foreground">{translateCampaignName(card.campaignName, language)}</h2>
                           {isArchivedCampaign && <Badge variant="outline" className="text-[10px] uppercase tracking-wide">{t('issued_badge_archived')}</Badge>}
                           {isRedeemed && <span className="rounded bg-gray-200 px-1.5 py-0.5 text-[10px] font-bold uppercase text-gray-600">{t('issued_badge_redeemed')}</span>}
                         </div>
@@ -740,7 +741,7 @@ export const IssuedCardsPage: React.FC<IssuedCardsPageProps> = ({ customers, cam
                           </div>
                           <div className={cn(isRedeemed && "opacity-60")}>
                             <div className="flex items-center gap-2 font-semibold text-foreground">
-                              {card.campaignName}
+                              {translateCampaignName(card.campaignName, language)}
                               {isArchivedCampaign && <Badge variant="outline" className="text-[10px] uppercase tracking-wide">{t('issued_badge_archived')}</Badge>}
                               {isRedeemed && <span className="rounded bg-gray-200 px-1.5 py-0.5 text-[10px] font-bold uppercase text-gray-600">{t('issued_badge_redeemed')}</span>}
                             </div>

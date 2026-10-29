@@ -14,6 +14,7 @@ import { ICON_OPTIONS } from '../lib/iconRegistry';
 import { useAuth } from './AuthProvider';
 import { buildCampaignSignupUrl } from '../lib/links';
 import { deleteCampaignAssetByUrl, type CampaignAssetKind, uploadCampaignAsset } from '../lib/storage/campaignAssets';
+import { useLanguage } from '../lib/i18n/LanguageContext';
 
 interface CardEditorProps {
   initialTemplate: Template;
@@ -354,6 +355,7 @@ const LOGO_FILE_ACCEPT = '.jpg,.jpeg,.png,.webp,.svg,image/jpeg,image/png,image/
 const BACKGROUND_FILE_ACCEPT = '.jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp';
 
 export const CardEditor: React.FC<CardEditorProps> = ({ initialTemplate, onSave }) => {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const { currentOwner } = useAuth();
   const [template, setTemplate] = useState<Template>(initialTemplate);
@@ -631,7 +633,7 @@ export const CardEditor: React.FC<CardEditorProps> = ({ initialTemplate, onSave 
             />
           </div>
           <p className="mt-3 text-center text-sm font-medium uppercase tracking-widest text-muted-foreground lg:mt-8">
-            Live Preview
+            {t('editor_live_preview')}
           </p>
         </div>
       </div>
@@ -643,8 +645,8 @@ export const CardEditor: React.FC<CardEditorProps> = ({ initialTemplate, onSave 
                   <ArrowLeft size={20} />
               </Button>
               <div>
-                  <h1 className="text-2xl font-bold tracking-tight">Customize</h1>
-                  <p className="text-sm text-muted-foreground">Design your perfect loyalty card.</p>
+                  <h1 className="text-2xl font-bold tracking-tight">{t('editor_title')}</h1>
+                  <p className="text-sm text-muted-foreground">{t('editor_subtitle')}</p>
               </div>
             </div>
             <Button
@@ -653,7 +655,7 @@ export const CardEditor: React.FC<CardEditorProps> = ({ initialTemplate, onSave 
               className="lg:hidden shrink-0"
               onClick={() => setIsPreviewOpen(true)}
             >
-              Live Preview
+              {t('editor_live_preview')}
             </Button>
         </div>
 
@@ -661,22 +663,22 @@ export const CardEditor: React.FC<CardEditorProps> = ({ initialTemplate, onSave 
             <Accordion type="multiple" value={openSections} onValueChange={setOpenSections} className="w-full">
                 <AccordionItem value="general">
                     <AccordionTrigger>
-                        <span className="flex items-center gap-2"><Type size={16}/> General Info</span>
+                        <span className="flex items-center gap-2"><Type size={16}/> {t('editor_tab_general')}</span>
                     </AccordionTrigger>
                     <AccordionContent className="space-y-4 pt-2">
                         <div className="space-y-2">
-                            <Label htmlFor="businessName">Name</Label>
+                            <Label htmlFor="businessName">{t('editor_name')}</Label>
                             <Input 
                                 id="businessName" 
                                 value={template.name} 
                                 onChange={(e) => handleChange('name', e.target.value)} 
-                                placeholder="e.g. Joe's Coffee"
+                                placeholder={t('editor_name_placeholder')}
                             />
                         </div>
                         
                         <div className="space-y-4 pt-2">
                             <div className="flex items-center justify-between">
-                                <Label htmlFor="showLogo" className="text-sm font-medium">Show Main Logo</Label>
+                                <Label htmlFor="showLogo" className="text-sm font-medium">{t('editor_show_logo')}</Label>
                                 <Switch 
                                     id="showLogo"
                                     checked={template.showLogo !== false}
@@ -688,7 +690,7 @@ export const CardEditor: React.FC<CardEditorProps> = ({ initialTemplate, onSave 
                         {template.showLogo !== false && (
                           <div className="space-y-3">
                             <div className="space-y-2">
-                              <Label htmlFor="logoUpload">Upload Brand Logo</Label>
+                              <Label htmlFor="logoUpload">{t('editor_upload_logo')}</Label>
                               <input
                                 id="logoUpload"
                                 ref={logoFileInputRef}
@@ -710,7 +712,7 @@ export const CardEditor: React.FC<CardEditorProps> = ({ initialTemplate, onSave 
                                 onClick={() => openFilePicker('logo')}
                                 disabled={logoUploadBusy}
                               >
-                                {logoUploadBusy ? 'Uploading logo...' : 'Upload logo from device'}
+                                {logoUploadBusy ? t('editor_uploading_logo') : t('editor_upload_btn')}
                               </Button>
                               {logoSelectedFileName && (
                                 <p className="text-xs text-muted-foreground">
@@ -721,7 +723,7 @@ export const CardEditor: React.FC<CardEditorProps> = ({ initialTemplate, onSave 
                                 JPG, PNG, WebP, or SVG up to 2MB.
                               </p>
                               {logoUploadBusy && (
-                                <p className="text-xs text-muted-foreground">Uploading logo...</p>
+                                <p className="text-xs text-muted-foreground">{t('editor_uploading_logo')}</p>
                               )}
                               {logoUploadError && (
                                 <p className="text-xs text-rose-700">{logoUploadError}</p>
@@ -731,7 +733,7 @@ export const CardEditor: React.FC<CardEditorProps> = ({ initialTemplate, onSave 
                               )}
                             </div>
                             <div className="space-y-2">
-                              <Label htmlFor="logoImage">Brand Logo URL</Label>
+                              <Label htmlFor="logoImage">{t('editor_logo_url')}</Label>
                               <div className="flex gap-2">
                                 <Input
                                   id="logoImage"
@@ -756,27 +758,27 @@ export const CardEditor: React.FC<CardEditorProps> = ({ initialTemplate, onSave 
                         )}
 
                         <div className="space-y-2">
-                            <Label htmlFor="rewardName">Reward Name</Label>
+                            <Label htmlFor="rewardName">{t('editor_reward_name')}</Label>
                             <Input 
                                 id="rewardName" 
                                 value={template.rewardName} 
                                 onChange={(e) => handleChange('rewardName', e.target.value)} 
-                                placeholder="e.g. Free Coffee"
+                                placeholder={t('editor_reward_placeholder')}
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="tagline">Tagline / Instruction</Label>
+                            <Label htmlFor="tagline">{t('editor_tagline')}</Label>
                             <Input 
                                 id="tagline" 
                                 value={template.tagline || ''} 
                                 onChange={(e) => handleChange('tagline', e.target.value)} 
-                                placeholder={`Collect ${template.totalStamps} stamps for a...`}
+                                placeholder={t('editor_tagline_placeholder')}
                             />
-                            <p className="text-xs text-muted-foreground">Override the default "Collect X stamps..." text.</p>
+                            <p className="text-xs text-muted-foreground">{t('editor_tagline_hint')}</p>
                         </div>
                         <div className="space-y-3">
                             <div className="flex items-center justify-between gap-3">
-                                <Label htmlFor="totalStamps">Number of Stamps</Label>
+                                <Label htmlFor="totalStamps">{t('editor_stamps_count')}</Label>
                                 <span className="inline-flex min-w-12 items-center justify-center rounded-full bg-secondary px-3 py-1 text-sm font-semibold">
                                     {template.totalStamps}
                                 </span>
@@ -801,13 +803,13 @@ export const CardEditor: React.FC<CardEditorProps> = ({ initialTemplate, onSave 
 
                 <AccordionItem value="design">
                     <AccordionTrigger>
-                        <span className="flex items-center gap-2"><Palette size={16}/> Design & Colors</span>
+                        <span className="flex items-center gap-2"><Palette size={16}/> {t('editor_tab_design')}</span>
                     </AccordionTrigger>
                     <AccordionContent className="space-y-6 pt-2">
                         <div className="space-y-3">
                             <div className="flex items-center justify-between">
-                                <Label className="text-xs uppercase tracking-wider text-muted-foreground">Preset Palettes</Label>
-                                <span className="text-[10px] text-muted-foreground">Built-in themes</span>
+                                <Label className="text-xs uppercase tracking-wider text-muted-foreground">{t('editor_preset_palettes')}</Label>
+                                <span className="text-[10px] text-muted-foreground">{t('editor_builtin_themes')}</span>
                             </div>
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
@@ -826,7 +828,7 @@ export const CardEditor: React.FC<CardEditorProps> = ({ initialTemplate, onSave 
                                                 ))}
                                             </div>
                                             <span className="truncate text-sm font-semibold">
-                                                {selectedPalette?.name ?? 'Custom Theme'}
+                                                {selectedPalette?.name ?? t('editor_custom_theme')}
                                             </span>
                                         </div>
                                         <ChevronDown size={16} className="shrink-0 opacity-70" />
@@ -838,7 +840,7 @@ export const CardEditor: React.FC<CardEditorProps> = ({ initialTemplate, onSave 
                                     className="w-[--radix-dropdown-menu-trigger-width] min-w-[280px] max-h-[18rem] overflow-y-auto rounded-lg border border-[#a8b0c3] bg-[#c8ceda] p-1.5 text-[#434b67] shadow-xl"
                                 >
                                     <p className="px-2 pb-1 pt-0.5 text-xs font-semibold tracking-wide text-[#68718d]">
-                                        Built-in Themes
+                                        {t('editor_builtin_themes')}
                                     </p>
                                     {PALETTE_PRESETS.map((palette) => {
                                         const selected = isPaletteSelected(palette);
@@ -1060,7 +1062,7 @@ export const CardEditor: React.FC<CardEditorProps> = ({ initialTemplate, onSave 
 
                 <AccordionItem value="icons">
                     <AccordionTrigger>
-                        <span className="flex items-center gap-2"><Grid size={16}/> Icon</span>
+                        <span className="flex items-center gap-2"><Grid size={16}/> {t('editor_tab_icons')}</span>
                     </AccordionTrigger>
                     <AccordionContent className="pt-2">
                         <div className="grid grid-cols-4 gap-2">
@@ -1089,7 +1091,7 @@ export const CardEditor: React.FC<CardEditorProps> = ({ initialTemplate, onSave 
 
                 <AccordionItem value="social">
                     <AccordionTrigger>
-                        <span className="flex items-center gap-2"><Smartphone size={16}/> Social</span>
+                        <span className="flex items-center gap-2"><Smartphone size={16}/> {t('editor_tab_social')}</span>
                     </AccordionTrigger>
                     <AccordionContent className="space-y-4 pt-2">
                         <div className="space-y-2">
@@ -1163,7 +1165,7 @@ export const CardEditor: React.FC<CardEditorProps> = ({ initialTemplate, onSave 
               onClick={handleSave}
               disabled={saveBusy || logoUploadBusy || backgroundUploadBusy}
             >
-                {saveBusy ? 'Saving...' : 'Save Campaign'} <CheckIcon size={20} />
+                {saveBusy ? t('editor_saving') : t('editor_save_campaign')} <CheckIcon size={20} />
             </Button>
         </div>
       </div>

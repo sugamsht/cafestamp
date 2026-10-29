@@ -9,7 +9,7 @@ import { Customer, Transaction } from '../types';
 import { cn } from '../lib/utils';
 import { Button } from './ui/button';
 import { useLanguage } from '../lib/i18n/LanguageContext';
-import { formatDateTime, translateTransactionRemarks, translateTransactionTitle } from '../lib/locale';
+import { formatDateTime, translateCampaignName, translateTransactionRemarks, translateTransactionTitle } from '../lib/locale';
 
 interface TransactionsPageProps {
   customers: Customer[];
@@ -247,7 +247,7 @@ export const TransactionsPage: React.FC<TransactionsPageProps> = ({ customers })
 
                     <div className="flex items-center justify-between text-xs pt-2 border-t border-gray-100">
                       <div>
-                        <span className="font-medium text-foreground">{tx.campaignName}</span>
+                        <span className="font-medium text-foreground">{translateCampaignName(tx.campaignName, language)}</span>
                         <span className="ml-2 font-mono text-[10px] text-muted-foreground bg-gray-100 px-1.5 py-0.5 rounded">
                           #{tx.cardId.slice(0, 8)}
                         </span>
@@ -303,7 +303,7 @@ export const TransactionsPage: React.FC<TransactionsPageProps> = ({ customers })
                                 </TableCell>
                                 <TableCell>
                                     <div className="flex items-center gap-2">
-                                        <span className="font-medium text-sm">{tx.campaignName}</span>
+                                        <span className="font-medium text-sm">{translateCampaignName(tx.campaignName, language)}</span>
                                     </div>
                                     <div className="text-[10px] font-mono text-muted-foreground bg-gray-100 inline-block px-1.5 rounded mt-0.5">
                                         #{tx.cardId.slice(0, 8)}

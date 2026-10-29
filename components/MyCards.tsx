@@ -19,6 +19,7 @@ import { useSubscriptionContext } from './SubscriptionContext';
 import { buildCampaignSignupUrl } from '../lib/links';
 import { useAuth } from './AuthProvider';
 import { useLanguage } from '../lib/i18n/LanguageContext';
+import { translateCampaignName, translateRewardName } from '../lib/locale';
 
 interface MyCardsProps {
   cards: Template[];
@@ -44,7 +45,7 @@ const ResponsiveCardItem: React.FC<ResponsiveCardItemProps> = ({
     onToggleEnabled,
     toggleBusy,
 }) => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const containerRef = useRef<HTMLDivElement>(null);
     const [scale, setScale] = useState(1);
     const navigate = useNavigate();
@@ -102,14 +103,14 @@ const ResponsiveCardItem: React.FC<ResponsiveCardItemProps> = ({
                 <div className="space-y-1 cursor-pointer" onClick={openActiveView}>
                     <div className="flex items-center justify-center gap-2">
                       <h3 className="font-bold text-2xl text-foreground tracking-tight group-hover:text-primary transition-colors truncate">
-                        {card.name}
+                        {translateCampaignName(card.name, language)}
                       </h3>
                       <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${card.isEnabled === false ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
                         {card.isEnabled === false ? t('campaigns_status_disabled') : t('campaigns_status_enabled')}
                       </span>
                     </div>
-                    <p className="text-sm text-muted-foreground truncate" title={card.rewardName}>
-                       {t('campaigns_reward_prefix')} {card.rewardName}
+                    <p className="text-sm text-muted-foreground truncate" title={translateRewardName(card.rewardName, language)}>
+                       {t('campaigns_reward_prefix')} {translateRewardName(card.rewardName, language)}
                     </p>
                 </div>
                 

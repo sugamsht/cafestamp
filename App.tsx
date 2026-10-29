@@ -182,6 +182,7 @@ const SeoManager: React.FC = () => {
 };
 
 const PublicCardWrapper: React.FC = () => {
+  const { t } = useLanguage();
   const { slug, uniqueId } = useParams<{ slug: string; uniqueId: string }>();
   const [loading, setLoading] = useState(true);
   const [cardData, setCardData] = useState<{
@@ -268,7 +269,7 @@ const PublicCardWrapper: React.FC = () => {
   if (!cardData) {
     return (
       <div className="h-screen flex items-center justify-center px-6 text-center text-muted-foreground">
-        {isSupabaseConfigured ? 'Card not found.' : SERVICE_UNAVAILABLE_MESSAGE}
+        {isSupabaseConfigured ? t('kiosk_card_not_found') : SERVICE_UNAVAILABLE_MESSAGE}
       </div>
     );
   }
@@ -320,10 +321,10 @@ const PublicCardWrapper: React.FC = () => {
               <div className="mx-auto mb-3 h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center">
                 <Lock size={22} className="text-gray-600" />
               </div>
-              <h2 className="text-xl font-bold text-gray-900">Redeemed</h2>
-              <p className="mt-1 text-sm text-gray-600">This card is closed.</p>
+              <h2 className="text-xl font-bold text-gray-900">{t('kiosk_status_redeemed')}</h2>
+              <p className="mt-1 text-sm text-gray-600">{t('kiosk_card_closed')}</p>
               <div className="mt-3 text-xs text-gray-500 font-mono">
-                Card ID: {card.uniqueId}
+                {t('card_id')}: {card.uniqueId}
               </div>
             </div>
           </div>
@@ -334,6 +335,7 @@ const PublicCardWrapper: React.FC = () => {
 };
 
 const StaffScanEntryWrapper: React.FC = () => {
+  const { t } = useLanguage();
   const { slug, uniqueId } = useParams<{ slug: string; uniqueId: string }>();
   const navigate = useNavigate();
   const { currentOwner, currentUser, loading } = useAuth();
@@ -388,7 +390,7 @@ const StaffScanEntryWrapper: React.FC = () => {
   if (!context) {
     return (
       <div className="h-screen flex items-center justify-center px-6 text-center text-muted-foreground">
-        Card not found.
+        {t('kiosk_card_not_found')}
       </div>
     );
   }
@@ -396,7 +398,7 @@ const StaffScanEntryWrapper: React.FC = () => {
   if (!currentUser || !currentOwner) {
     return (
       <div className="h-screen flex items-center justify-center px-6 text-center text-muted-foreground">
-        Redirecting to staff login...
+        {t('scan_entry_redirecting')}
       </div>
     );
   }
@@ -405,9 +407,9 @@ const StaffScanEntryWrapper: React.FC = () => {
     return (
       <div className="h-screen flex items-center justify-center bg-background px-6">
         <div className="w-full max-w-md rounded-2xl border bg-card p-6 text-center shadow-sm">
-          <h1 className="text-xl font-semibold text-foreground">Wrong business</h1>
+          <h1 className="text-xl font-semibold text-foreground">{t('scan_entry_wrong_business')}</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            This card is not part of your business.
+            {t('scan_entry_wrong_business_desc')}
           </p>
         </div>
       </div>
@@ -416,7 +418,7 @@ const StaffScanEntryWrapper: React.FC = () => {
 
   return (
     <div className="h-screen flex items-center justify-center px-6 text-center text-muted-foreground">
-      Opening kiosk...
+      {t('scan_entry_opening_kiosk')}
     </div>
   );
 };
