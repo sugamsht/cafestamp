@@ -433,18 +433,12 @@ const ActiveCardWrapper: React.FC<{ templates: Template[] }> = ({ templates }) =
 
   return (
     <div className="h-screen w-full bg-background relative flex flex-col items-center justify-center animate-fade-in">
-      <button
-        onClick={() => navigate('/campaigns')}
-        className="absolute top-6 left-6 z-50 bg-black/50 text-white rounded-full p-2 hover:bg-black/70 transition-colors backdrop-blur-sm"
-        title="Close"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-      </button>
       {withSuspense(
         <LoyaltyCard
           template={template}
           mode="active"
           qrValue={signupQrUrl}
+          onBack={() => navigate('/campaigns')}
           className="h-full w-full"
         />
       )}

@@ -377,13 +377,27 @@ export const LoyaltyCard: React.FC<LoyaltyCardProps> = ({
           {/* --- SLIDE 1: FRONT (Stamps) --- */}
           <div className="w-full h-[50%] relative flex flex-col items-center justify-center p-6">
             
-            {/* Top Header (Language Switcher & QR Button) */}
+            {/* Top Header (Close/Back Button, Language Switcher & QR Button) */}
             <div className={cn(
-                "absolute top-6 left-6 right-6 flex justify-between items-center z-30 transition-all duration-500",
+                "absolute left-6 right-6 flex justify-between items-center z-30 transition-all duration-500",
+                mode === 'preview' && onBack ? "top-16" : "top-6",
                 currentSlide === 0 ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"
             )}>
-                 {/* Left: Language Switcher */}
-                 <LanguageSwitcher variant="toggle" />
+                 {/* Left: Close/Back button (if onBack) + Language Switcher */}
+                 <div className="flex items-center gap-2.5 sm:gap-3">
+                   {onBack && mode !== 'preview' && (
+                     <button
+                       type="button"
+                       onClick={onBack}
+                       className="w-10 h-10 rounded-full flex items-center justify-center border shadow-sm bg-black/50 hover:bg-black/70 text-white border-white/20 transition-transform hover:scale-105 active:scale-95 cursor-pointer backdrop-blur-sm"
+                       title={t('cancel')}
+                       aria-label="Back"
+                     >
+                       <X size={20} />
+                     </button>
+                   )}
+                   {sizeVariant !== 'compact' && <LanguageSwitcher variant="toggle" />}
+                 </div>
 
                  {/* Right: QR Trigger */}
                  <button 
@@ -573,16 +587,29 @@ export const LoyaltyCard: React.FC<LoyaltyCardProps> = ({
               {/* Minimalist Header for Slide 2 */}
               <div className="w-full flex justify-between items-center p-6 border-b border-gray-100 sticky top-0 bg-white/95 backdrop-blur-sm z-50">
                    <div className="flex items-center gap-3">
+                       {onBack && mode !== 'preview' && (
+                         <button
+                           type="button"
+                           onClick={onBack}
+                           className="p-2 -ml-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500 hover:text-gray-900"
+                           title={t('cancel')}
+                           aria-label="Back"
+                         >
+                           <X size={20} />
+                         </button>
+                       )}
                        <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
                            <Icon size={16} className="text-gray-900"/>
                        </div>
                        <span className="font-bold text-sm tracking-wide uppercase text-gray-500">{t('card_history_qr')}</span>
                    </div>
                    <div className="flex items-center gap-3">
-                     <LanguageSwitcher variant="toggle" />
+                     {sizeVariant !== 'compact' && <LanguageSwitcher variant="toggle" />}
                      <button 
+                       type="button"
                        onClick={() => setCurrentSlide(0)} 
                        className="p-2 -mr-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-900"
+                       title={t('cancel')}
                      >
                          <X size={24} />
                      </button>
