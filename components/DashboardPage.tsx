@@ -18,6 +18,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { useAuth } from './AuthProvider';
 import { loadFromStorage, saveToStorage } from '../lib/storage';
 import { cn } from '../lib/utils';
+import { useLanguage } from '../lib/i18n/LanguageContext';
+import { formatDateTime } from '../lib/locale';
 
 interface DashboardPageProps {
   campaigns: Template[];
@@ -46,31 +48,26 @@ const defaultDismissState: DashboardDismissState = {
   getStarted: false,
 };
 
-const formatAction = (type: Transaction['type']) => {
-  switch (type) {
-    case 'issued':
-      return 'Card issued';
-    case 'redeem':
-      return 'Reward redeemed';
-    case 'stamp_remove':
-      return 'Stamp removed';
-    default:
-      return 'Stamp added';
-  }
-};
-
-const formatTimestamp = (timestamp: number) =>
-  new Date(timestamp).toLocaleString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  });
-
 export const DashboardPage: React.FC<DashboardPageProps> = ({ campaigns, customers }) => {
   const { currentOwner } = useAuth();
+  const { t, language } = useLanguage();
   const cards = useMemo(() => customers.flatMap((customer) => customer.cards), [customers]);
   const [dismissedSections, setDismissedSections] = useState<DashboardDismissState>(defaultDismissState);
+
+  const formatAction = (type: Transaction['type']) => {
+    switch (type) {
+      case 'issued':
+        return t('tx_card_issued');
+      case 'redeem':
+        return t('tx_reward_redeemed');
+      case 'stamp_remove':
+        return t('tx_stamp_removed');
+      default:
+        return t('tx_stamp_added');
+    }
+  };
+
+  const formatTimestamp = (timestamp: number) => formatDateTime(timestamp, language);
 
   const recentActivity = useMemo<ActivityItem[]>(
     () =>
@@ -98,25 +95,25 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ campaigns, custome
 
   const steps: ChecklistStep[] = [
     {
-      title: 'Create Campaign',
-      description: 'Create your first loyalty campaign.',
+      title: t('dashboard_step1_title'),
+      description: t('dashboard_step1_desc'),
       href: '/gallery',
       complete: campaigns.length > 0,
-      buttonLabel: 'Create campaign',
+      buttonLabel: t('dashboard_step1_btn'),
     },
     {
-      title: 'Issue Card',
-      description: 'Issue your first loyalty card to a customer.',
+      title: t('dashboard_step2_title'),
+      description: t('dashboard_step2_desc'),
       href: '/issued-cards',
       complete: cards.length > 0,
-      buttonLabel: 'Issue card',
+      buttonLabel: t('dashboard_step2_btn'),
     },
     {
-      title: 'Stamp a Card',
-      description: 'Open an issued card and add the first stamp.',
+      title: t('dashboard_step3_title'),
+      description: t('dashboard_step3_desc'),
       href: '/issued-cards',
       complete: hasStampActivity,
-      buttonLabel: 'Add stamp',
+      buttonLabel: t('dashboard_step3_btn'),
     },
   ];
 
@@ -127,27 +124,27 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ campaigns, custome
 
   const statCards = [
     {
-      label: 'Campaigns',
+      label: t('dashboard_stat_campaigns'),
       value: campaigns.length,
-      detail: campaigns.length === 1 ? '1 campaign live' : `${campaigns.length} campaigns live`,
+      detail: campaigns.length === 1 ? t('dashboard_stat_campaign_single') : t('dashboard_stat_campaigns_live', { n: campaigns.length }),
       icon: CreditCard,
     },
     {
-      label: 'Issued Cards',
+      label: t('dashboard_stat_issued_cards'),
       value: cards.length,
-      detail: cards.length === 1 ? '1 card issued' : `${cards.length} cards issued`,
+      detail: cards.length === 1 ? t('dashboard_stat_card_single') : t('dashboard_stat_cards_issued', { n: cards.length }),
       icon: Wallet,
     },
     {
-      label: 'Customers',
+      label: t('dashboard_stat_customers'),
       value: customers.length,
-      detail: customers.length === 1 ? '1 customer added' : `${customers.length} customers added`,
+      detail: customers.length === 1 ? t('dashboard_stat_customer_single') : t('dashboard_stat_customers_added', { n: customers.length }),
       icon: Users,
     },
     {
-      label: 'Active Cards',
+      label: t('dashboard_stat_active_cards'),
       value: activeCardCount,
-      detail: `${redeemedCardCount} redeemed`,
+      detail: t('dashboard_stat_redeemed', { n: redeemedCardCount }),
       icon: Sparkles,
     },
   ];
@@ -183,21 +180,21 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ campaigns, custome
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div className="space-y-2">
               <Badge variant="outline" className="w-fit rounded-full px-3 py-1 text-[11px] uppercase tracking-[0.18em]">
-                Owner Overview
+                {t('dashboard_owner_overview')}
               </Badge>
               <div>
-                <h1 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl">Dashboard</h1>
+                <h1 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl">{t('dashboard_title')}</h1>
                 <p className="mt-2 max-w-2xl text-sm text-muted-foreground md:text-base">
-                  Get your loyalty program live in three steps. Progress updates automatically as you create campaigns, issue cards, and start stamping.
+                  {t('dashboard_subtitle')}
                 </p>
               </div>
             </div>
             <div className="flex flex-wrap gap-3">
               <Button asChild variant="outline" className="rounded-full">
-                <Link to="/campaigns">View Campaigns</Link>
+                <Link to="/campaigns">{t('dashboard_view_campaigns')}</Link>
               </Button>
               <Button asChild className="rounded-full">
-                <Link to="/gallery">Create Campaign</Link>
+                <Link to="/gallery">{t('dashboard_create_campaign')}</Link>
               </Button>
             </div>
           </div>
@@ -209,21 +206,21 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ campaigns, custome
               <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div>
                   <div className="flex items-center gap-2">
-                    <CardTitle className="text-xl">Get started</CardTitle>
+                    <CardTitle className="text-xl">{t('dashboard_get_started')}</CardTitle>
                     {setupComplete && (
                       <Button
                         variant="outline"
                         size="sm"
                         className="rounded-full border-red-200 bg-red-50 text-red-700 hover:bg-red-100 hover:text-red-800"
                         onClick={() => dismissSection('getStarted')}
-                        aria-label="Dismiss get started"
+                        aria-label={t('dashboard_dismiss')}
                       >
-                        Dismiss
+                        {t('dashboard_dismiss')}
                       </Button>
                     )}
                   </div>
                   <CardDescription className="mt-1 text-sm">
-                    Launch your loyalty program in three steps.
+                    {t('dashboard_get_started_sub')}
                   </CardDescription>
                 </div>
                 <Badge
@@ -233,7 +230,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ campaigns, custome
                     setupComplete && 'bg-emerald-600 text-white hover:bg-emerald-600'
                   )}
                 >
-                  {setupComplete ? 'Setup complete' : `${completedSteps} of ${steps.length} completed`}
+                  {setupComplete ? t('dashboard_setup_complete') : t('dashboard_steps_progress', { completed: completedSteps, total: steps.length })}
                 </Badge>
               </div>
               <div className="space-y-2">
@@ -245,11 +242,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ campaigns, custome
                 </div>
                 {setupComplete ? (
                   <p className="text-sm text-muted-foreground">
-                    Your loyalty workflow is ready. Jump back into campaigns or issued cards anytime.
+                    {t('dashboard_ready_msg')}
                   </p>
                 ) : (
                   <p className="text-sm text-muted-foreground">
-                    Complete each step in order. The next action stays one click away.
+                    {t('dashboard_pending_msg')}
                   </p>
                 )}
               </div>
@@ -277,7 +274,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ campaigns, custome
                           <h3 className="text-base font-semibold text-foreground">{step.title}</h3>
                           {step.complete && (
                             <Badge variant="outline" className="rounded-full border-emerald-200 bg-emerald-50 text-emerald-700">
-                              Completed
+                              {t('dashboard_step_completed')}
                             </Badge>
                           )}
                         </div>
@@ -288,10 +285,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ campaigns, custome
                       <Button asChild variant="ghost" className="justify-start rounded-full md:justify-center">
                         <Link to={step.href}>
                           {setupComplete
-                            ? step.title === 'Create Campaign'
-                              ? 'Create another'
-                              : 'Open workflow'
-                            : 'Review'}
+                            ? step.title === t('dashboard_step1_title')
+                              ? t('dashboard_create_another')
+                              : t('dashboard_open_workflow')
+                            : t('dashboard_review')}
                         </Link>
                       </Button>
                     ) : (
@@ -309,13 +306,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ campaigns, custome
               {setupComplete && (
                 <div className="flex flex-wrap gap-3 border-t border-border/70 pt-2">
                   <Button asChild variant="outline" className="rounded-full">
-                    <Link to="/gallery">Create Campaign</Link>
+                    <Link to="/gallery">{t('dashboard_create_campaign')}</Link>
                   </Button>
                   <Button asChild variant="outline" className="rounded-full">
-                    <Link to="/campaigns">View Campaigns</Link>
+                    <Link to="/campaigns">{t('dashboard_view_campaigns')}</Link>
                   </Button>
                   <Button asChild variant="outline" className="rounded-full">
-                    <Link to="/issued-cards">View Issued Cards</Link>
+                    <Link to="/issued-cards">{t('dashboard_view_issued_cards')}</Link>
                   </Button>
                 </div>
               )}
@@ -344,13 +341,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ campaigns, custome
           <CardHeader className="border-b border-border/70 pb-5">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <CardTitle className="text-xl">Recent activity</CardTitle>
+                <CardTitle className="text-xl">{t('dashboard_recent_activity')}</CardTitle>
                 <CardDescription className="mt-1">
-                  Latest transactions across all issued cards.
+                  {t('dashboard_recent_activity_sub')}
                 </CardDescription>
               </div>
               <div className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
-                {recentActivity.length} shown
+                {t('dashboard_shown', { n: recentActivity.length })}
               </div>
             </div>
           </CardHeader>
@@ -360,9 +357,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ campaigns, custome
                 <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-card shadow-subtle">
                   <ReceiptText size={20} className="text-muted-foreground" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground">No activity yet</h3>
+                <h3 className="text-lg font-semibold text-foreground">{t('dashboard_no_activity')}</h3>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Complete the checklist above to get started.
+                  {t('dashboard_no_activity_sub')}
                 </p>
               </div>
             ) : (
@@ -385,13 +382,15 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ campaigns, custome
                       <div>
                         <p className="font-semibold text-foreground">{formatAction(transaction.type)}</p>
                         <p className="text-sm text-muted-foreground">
-                          {transaction.customerName} on {transaction.campaignName}
+                          {transaction.customerName} {t('dashboard_on')} {transaction.campaignName}
                         </p>
                       </div>
                     </div>
                     <div className="text-sm text-muted-foreground md:text-right">
                       <div>{formatTimestamp(transaction.timestamp)}</div>
-                      <div className="text-xs uppercase tracking-[0.14em]">{transaction.actorRole ?? 'owner'}</div>
+                      <div className="text-xs uppercase tracking-[0.14em]">
+                        {transaction.actorRole === 'staff' ? t('transactions_role_staff') : t('transactions_role_owner')}
+                      </div>
                     </div>
                   </div>
                 ))}

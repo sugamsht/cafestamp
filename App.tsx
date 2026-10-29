@@ -21,7 +21,7 @@ import { Lock } from 'lucide-react';
 import { toStoredTemplate, fromStoredTemplate } from './lib/templateSerialization';
 import { cn, hexToRgba, resolveHexAndOpacity } from './lib/utils';
 import { AuthProvider, useAuth } from './components/AuthProvider';
-import { LanguageProvider } from './lib/i18n/LanguageContext';
+import { LanguageProvider, useLanguage } from './lib/i18n/LanguageContext';
 import { RequireAuth } from './components/RequireAuth';
 import { RequireRole } from './components/RequireRole';
 import { VerifyBanner } from './components/VerifyBanner';
@@ -510,10 +510,12 @@ const EditorWrapper: React.FC<{ onSave: (t: Template) => Promise<void>; template
 };
 
 const DashboardLayout: React.FC = () => {
+  const { t } = useLanguage();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const location = useLocation();
 
-  const activeTitle = NAV_ITEMS.find((item) => item.path === location.pathname)?.label ?? "Dashboard";
+  const navItem = NAV_ITEMS.find((item) => item.path === location.pathname);
+  const activeTitle = navItem ? t(navItem.labelKey) : t('nav_dashboard');
 
   return (
     <div className="flex min-h-screen bg-background text-foreground font-sans">
@@ -548,7 +550,7 @@ const DashboardLayout: React.FC = () => {
             isMobileNavOpen ? "translate-x-0" : "-translate-x-full"
           )}>
             <div className="flex items-center justify-between px-4 py-4 border-b">
-              <span className="text-sm font-semibold">Menu</span>
+              <span className="text-sm font-semibold">{t('nav_menu')}</span>
               <button
                 className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border/80"
                 onClick={() => setIsMobileNavOpen(false)}

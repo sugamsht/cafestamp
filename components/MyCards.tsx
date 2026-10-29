@@ -18,6 +18,7 @@ import { Label } from './ui/label';
 import { useSubscriptionContext } from './SubscriptionContext';
 import { buildCampaignSignupUrl } from '../lib/links';
 import { useAuth } from './AuthProvider';
+import { useLanguage } from '../lib/i18n/LanguageContext';
 
 interface MyCardsProps {
   cards: Template[];
@@ -43,6 +44,7 @@ const ResponsiveCardItem: React.FC<ResponsiveCardItemProps> = ({
     onToggleEnabled,
     toggleBusy,
 }) => {
+    const { t } = useLanguage();
     const containerRef = useRef<HTMLDivElement>(null);
     const [scale, setScale] = useState(1);
     const navigate = useNavigate();
@@ -103,11 +105,11 @@ const ResponsiveCardItem: React.FC<ResponsiveCardItemProps> = ({
                         {card.name}
                       </h3>
                       <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${card.isEnabled === false ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
-                        {card.isEnabled === false ? 'Disabled' : 'Enabled'}
+                        {card.isEnabled === false ? t('campaigns_status_disabled') : t('campaigns_status_enabled')}
                       </span>
                     </div>
                     <p className="text-sm text-muted-foreground truncate" title={card.rewardName}>
-                       Reward: {card.rewardName}
+                       {t('campaigns_reward_prefix')} {card.rewardName}
                     </p>
                 </div>
                 
@@ -117,16 +119,16 @@ const ResponsiveCardItem: React.FC<ResponsiveCardItemProps> = ({
                         className="rounded-full px-5 gap-2 shadow-sm font-semibold" 
                         onClick={openActiveView}
                     >
-                        <Play size={16} fill="currentColor" /> Open
+                        <Play size={16} fill="currentColor" /> {t('campaigns_btn_open')}
                     </Button>
                     <Button
                         variant="outline"
                         size="sm"
                         className="rounded-full gap-1.5"
                         onClick={() => onShowSignupQr(card)}
-                        title="Show signup QR"
+                        title={t('campaigns_btn_qr')}
                     >
-                        <QrCode size={14} /> QR
+                        <QrCode size={14} /> {t('campaigns_btn_qr')}
                     </Button>
                     <Button
                         variant="outline"
@@ -134,10 +136,10 @@ const ResponsiveCardItem: React.FC<ResponsiveCardItemProps> = ({
                         className="rounded-full gap-1.5"
                         onClick={() => onToggleEnabled(card.id, card.isEnabled === false)}
                         disabled={toggleBusy}
-                        title={card.isEnabled === false ? 'Enable campaign' : 'Disable campaign'}
+                        title={card.isEnabled === false ? t('campaigns_btn_enable') : t('campaigns_btn_disable')}
                     >
                         <Power size={14} />
-                        {card.isEnabled === false ? 'Enable' : 'Disable'}
+                        {card.isEnabled === false ? t('campaigns_btn_enable') : t('campaigns_btn_disable')}
                     </Button>
                     <div className="flex items-center gap-1">
                         <Button 
@@ -145,7 +147,7 @@ const ResponsiveCardItem: React.FC<ResponsiveCardItemProps> = ({
                             size="icon" 
                             className="h-9 w-9 rounded-full hover:bg-gray-100" 
                             onClick={() => onEdit(card.id)}
-                            title="Edit Campaign"
+                            title={t('campaigns_btn_edit')}
                         >
                             <Edit2 size={18} className="text-muted-foreground" />
                         </Button>
@@ -154,7 +156,7 @@ const ResponsiveCardItem: React.FC<ResponsiveCardItemProps> = ({
                             size="icon" 
                             className="h-9 w-9 rounded-full hover:bg-red-50 hover:text-destructive" 
                             onClick={() => onDelete(card.id)}
-                            title="Delete Campaign"
+                            title={t('campaigns_btn_delete')}
                         >
                             <Trash2 size={18} />
                         </Button>
@@ -172,6 +174,7 @@ export const MyCards: React.FC<MyCardsProps> = ({
 }) => {
   const navigate = useNavigate();
   const { currentOwner } = useAuth();
+  const { t } = useLanguage();
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [qrCard, setQrCard] = useState<Template | null>(null);
   const [toggleBusyId, setToggleBusyId] = useState<string | null>(null);
@@ -231,13 +234,13 @@ export const MyCards: React.FC<MyCardsProps> = ({
                 <CreditCard size={24} />
             </div>
             <div>
-                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">Campaigns</h1>
-                <p className="text-muted-foreground">Manage your active loyalty campaigns.</p>
+                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">{t('campaigns_title')}</h1>
+                <p className="text-muted-foreground">{t('campaigns_subtitle')}</p>
             </div>
         </div>
         <div className="flex items-center gap-3">
             <Button onClick={handleCreateNew} className="gap-2 rounded-full shadow-sm w-full md:w-auto h-11 text-base">
-                <PlusCircle size={20} /> Create New
+                <PlusCircle size={20} /> {t('campaigns_create_new')}
             </Button>
         </div>
       </header>
@@ -247,11 +250,11 @@ export const MyCards: React.FC<MyCardsProps> = ({
           <div className="bg-white p-6 rounded-full shadow-sm mb-6">
              <PlusCircle size={40} className="text-muted-foreground" />
           </div>
-          <h3 className="text-2xl font-bold text-foreground">No campaigns created yet</h3>
+          <h3 className="text-2xl font-bold text-foreground">{t('campaigns_empty_title')}</h3>
           <p className="text-muted-foreground max-w-sm text-center mt-2 mb-8 text-lg">
-            Get started by creating your first digital loyalty campaign from our templates.
+            {t('campaigns_empty_desc')}
           </p>
-          <Button onClick={handleCreateNew} size="lg" className="rounded-full text-lg px-8 h-14">Create your first campaign</Button>
+          <Button onClick={handleCreateNew} size="lg" className="rounded-full text-lg px-8 h-14">{t('campaigns_create_first')}</Button>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-8 sm:gap-10 pb-12 px-2 md:px-4">
@@ -272,9 +275,9 @@ export const MyCards: React.FC<MyCardsProps> = ({
       <Dialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Campaign?</DialogTitle>
+            <DialogTitle>{t('campaigns_delete_dialog_title')}</DialogTitle>
             <DialogDescription>
-              This action cannot be undone. This will permanently delete <strong>{cards.find(c => c.id === deleteId)?.name}</strong> from your campaigns, but any issued cards will stay active and keep using their saved card snapshot.
+              {t('campaigns_delete_dialog_desc')}
             </DialogDescription>
           </DialogHeader>
           {deleteError && (
@@ -283,9 +286,9 @@ export const MyCards: React.FC<MyCardsProps> = ({
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteId(null)} disabled={deleteBusy}>Cancel</Button>
+            <Button variant="outline" onClick={() => setDeleteId(null)} disabled={deleteBusy}>{t('cancel')}</Button>
             <Button variant="destructive" onClick={confirmDelete} disabled={deleteBusy}>
-              {deleteBusy ? "Deleting..." : "Delete"}
+              {deleteBusy ? t('saving') : t('campaigns_delete_confirm')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -294,25 +297,25 @@ export const MyCards: React.FC<MyCardsProps> = ({
       <Dialog open={!!qrCard} onOpenChange={(open) => !open && setQrCard(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Campaign Signup QR</DialogTitle>
+            <DialogTitle>{t('campaigns_qr_dialog_title')}</DialogTitle>
             <DialogDescription>
-              Customers can scan this QR code at reception to join <strong>{qrCard?.name}</strong>.
+              {t('campaigns_qr_dialog_desc')}
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col items-center gap-4 py-2">
             {qrUrl && (
               <div className="rounded-xl border bg-white p-3">
-                <QrCodeDisplay value={qrUrl} className="h-56 w-56" label="Campaign signup QR code" />
+                <QrCodeDisplay value={qrUrl} className="h-56 w-56" label={t('campaigns_qr_dialog_title')} />
               </div>
             )}
             <div className="w-full space-y-2">
-              <Label className="text-xs text-muted-foreground">Signup link</Label>
+              <Label className="text-xs text-muted-foreground">{t('campaigns_qr_copy')}</Label>
               <div className="flex items-center gap-2">
                 <Input readOnly value={qrDisplayUrl || qrUrl} className="text-xs font-mono bg-muted/40" />
-                <Button type="button" variant="outline" size="icon" onClick={handleCopyQrUrl} title="Copy link">
+                <Button type="button" variant="outline" size="icon" onClick={handleCopyQrUrl} title={t('campaigns_qr_copy')}>
                   <Copy size={14} />
                 </Button>
-                <Button type="button" variant="outline" size="icon" onClick={handleOpenQrUrl} title="Open link">
+                <Button type="button" variant="outline" size="icon" onClick={handleOpenQrUrl} title={t('campaigns_qr_open')}>
                   <ExternalLink size={14} />
                 </Button>
               </div>

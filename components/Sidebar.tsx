@@ -30,6 +30,7 @@ export const NAV_ITEMS = [
 ];
 
 const PlanBadge: React.FC = () => {
+  const { t } = useLanguage();
   const {
     isProTier,
     campaignCount,
@@ -44,7 +45,7 @@ const PlanBadge: React.FC = () => {
     return (
       <div className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 px-3 py-2 text-xs">
         <Crown size={14} className="text-amber-500" />
-        <span className="font-semibold text-amber-700">Pro Plan</span>
+        <span className="font-semibold text-amber-700">{t('plan_pro')}</span>
       </div>
     );
   }
@@ -52,13 +53,13 @@ const PlanBadge: React.FC = () => {
   return (
     <div className="rounded-lg border border-border/80 bg-muted/30 px-3 py-2.5 text-xs space-y-1.5">
       <div className="flex items-center justify-between">
-        <span className="font-semibold text-foreground">Beta Plan</span>
+        <span className="font-semibold text-foreground">{t('plan_beta')}</span>
         <Sparkles size={12} className="text-muted-foreground" />
       </div>
       <div className="flex items-center gap-3 text-muted-foreground">
-        <span>{campaignCount}/{campaignLimit === Infinity ? '∞' : campaignLimit} campaigns</span>
+        <span>{t('plan_campaigns', { count: campaignCount, limit: campaignLimit === Infinity ? '∞' : campaignLimit })}</span>
         <span className="text-border">|</span>
-        <span>{issuedCardCount}/{cardLimit === Infinity ? '∞' : cardLimit} cards</span>
+        <span>{t('plan_cards', { count: issuedCardCount, limit: cardLimit === Infinity ? '∞' : cardLimit })}</span>
       </div>
     </div>
   );

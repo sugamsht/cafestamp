@@ -17,10 +17,6 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved === 'es' || saved === 'en') return saved;
-      // Auto-detect: if browser language starts with 'en', we can offer 'en', otherwise default to 'es'
-      if (typeof navigator !== 'undefined' && navigator.language && navigator.language.startsWith('en')) {
-        return 'en';
-      }
     } catch {
       // ignore localStorage errors in private mode
     }
